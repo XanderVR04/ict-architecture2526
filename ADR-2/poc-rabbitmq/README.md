@@ -15,7 +15,8 @@ Open twee terminal windows. Type in het eerste eerst dit, waarbij het eerste com
 6) docker service logs -f poc_uploader
 
 En daarna in het tweede dit:
-7) docker service logs -f poc_processor
+
+1) docker service logs -f poc_processor
 
 ## Validatie
 - Uploader stuurt elke 2s een job.
