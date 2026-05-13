@@ -1,0 +1,43 @@
+import os
+import time
+
+import pika
+
+# Voor flexibiliteit worden de RabbitMQ-verbinding parameters uit omgevingsvariabelen gehaald,
+# met standaardwaarden voor het geval dat deze niet zijn ingesteld.
+host = os.getenv("RABBITMQ_HOST", "rabbitmq")
+user = os.getenv("RABBITMQ_USER", "user")
+password = os.getenv("RABBITMQ_PASS", "pass")
+
+# De credentials en connection parameters worden ingesteld voor het verbinden met RabbitMQ.
+# De credentials zijn bedoeld als authenticatie, en de heartbeat helpt bij 
+# het detecteren van dode verbindingen en houdt de connectie actief.
+creds = pika.PlainCredentials(user, password)
+params = pika.ConnectionParameters(host=host, credentials=creds, heartbeat=30)
+
+# Toegevoegd voor het geval dat de processor eerder start dan de uploader, 
+# zodat er een retry mechanisme is om te verbinden met RabbitMQ.
+while True:
+    try:
+        conn = pika.BlockingConnection(params)
+        ch = conn.channel()
+        ch.queue_declare(queue="ocr_jobs", durable=True)
+        break
+    except Exception:
+        time.sleep(2)
+
+
+i = 1
+while True:
+    msg = f"job-{i}"
+    ch.basic_publish(
+        exchange="",
+        routing_key="ocr_jobs",
+        body=msg,
+        # delivery_mode=2 zorgt ervoor dat het bericht persistent is, 
+        # wat betekent dat het niet verloren gaat als RabbitMQ herstart.
+        properties=pika.BasicProperties(delivery_mode=2),
+    )
+    print("uploaded", msg, flush=True)
+    i += 1
+    time.sleep(2)

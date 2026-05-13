@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: pass
+    networks:
+      - poc-net
+
+  uploader:
+    image: poc-uploader
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: user
+      RABBITMQ_PASS: pass
+    networks:
+      - poc-net
+    deploy:
+      replicas: 1
+
+  processor:
+    image: poc-processor
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: user
+      RABBITMQ_PASS: pass
+    networks:
+      - poc-net
+    deploy:
+      replicas: 1
+
+networks:
+  poc-net:
+    driver: overlay
