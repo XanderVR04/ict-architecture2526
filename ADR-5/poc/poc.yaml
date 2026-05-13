@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "K8#zP2!mX9vL_qR4"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+    ports:
+      - "8080:8080"
+    configs:
+      - source: keycloak_realm
+        target: /opt/keycloak/data/import/realm-export.json
+    networks:
+      - archief-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+
+  api:
+    image: python:3.11-slim
+    command: sh -c "pip install flask 'PyJWT[crypto]' requests --quiet && python /app.py"
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: archief-realm
+    configs:
+      - source: flask_app
+        target: /app.py
+    ports:
+      - "5000:5000"
+    networks:
+      - archief-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+
+configs:
+  flask_app:
+    file: ./app.py
+  keycloak_realm:
+    file: ./keycloak/realm-export.json
+
+networks:
+  archief-net:
+    driver: overlay

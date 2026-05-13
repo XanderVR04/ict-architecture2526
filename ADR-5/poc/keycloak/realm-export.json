@@ -1,0 +1,65 @@
+{
+  "realm": "archief-realm",
+  "enabled": true,
+  "sslRequired": "external",
+  "roles": {
+    "realm": [
+      {
+        "name": "researcher",
+        "description": "Kan bestanden uploaden en beheren"
+      },
+      {
+        "name": "viewer",
+        "description": "Kan bestanden alleen bekijken"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "test-client",
+      "name": "Test Client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["http://localhost/*"],
+      "webOrigins": ["*"],
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "researcher1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Onderzoeker",
+      "lastName": "Een",
+      "email": "researcher1@archief.be",
+      "realmRoles": ["researcher"],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "wachtwoord123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "viewer1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Lezer",
+      "lastName": "Een",
+      "email": "viewer1@archief.be",
+      "realmRoles": ["viewer"],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "wachtwoord123",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
