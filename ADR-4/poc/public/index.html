@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nationale Archieven - Event Sourcing</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #fff; color: #000; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1, h2, h3 { margin: 0 0 10px 0; }
+        h1 { border-bottom: 2px solid #000; padding-bottom: 10px; }
+        h2 { font-size: 1.2em; }
+        h3 { font-size: 1em; font-weight: bold; }
+        .container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: #fff; border: 1px solid #000; padding: 20px; flex: 1; min-width: 300px; }
+        
+        input, button, select, textarea { padding: 10px; margin: 5px 0; border: 1px solid #000; background: #fff; color: #000; }
+        button { cursor: pointer; font-weight: bold; }
+        button:hover { background: #000; color: #fff; }
+        
+        .search-box, .filters { margin-bottom: 15px; }
+        .search-box input { width: 100%; box-sizing: border-box; }
+        
+        .doc-list { max-height: 400px; overflow-y: auto; }
+        .doc-item { border: 1px solid #000; padding: 10px; margin-bottom: 10px; cursor: pointer; }
+        .doc-item:hover { background: #f0f0f0; }
+        .doc-item.active { background: #000; color: #fff; }
+        
+        .detail-info { margin: 15px 0; }
+        .detail-info div { margin-bottom: 5px; }
+        .detail-info label { font-weight: bold; }
+        
+        .actions-panel { margin-top: 20px; border-top: 1px solid #000; padding-top: 15px; }
+        .actions-panel input, .actions-panel textarea { width: 100%; box-sizing: border-box; }
+        
+        .history-list { max-height: 300px; overflow-y: auto; }
+        .history-item { border-left: 3px solid #000; padding-left: 10px; margin-bottom: 10px; }
+        .history-date { font-size: 0.85em; color: #666; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; justify-content: center; align-items: center; }
+        .modal.show { display: flex; }
+        .modal-content { border: 2px solid #000; padding: 20px; width: 400px; }
+        .modal-content input, .modal-content select { width: 100%; box-sizing: border-box; }
+        .modal-buttons { margin-top: 15px; }
+        
+        .empty-state { text-align: center; padding: 40px; color: #666; }
+        
+        .doc-badge { display: inline-block; padding: 2px 6px; border: 1px solid #000; font-size: 0.8em; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Nationale Archieven</h1>
+        <button onclick="showNewDocModal()">+ Nieuw Document</button>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="card">
+                <h2>Archieven</h2>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Zoeken op titel of auteur..." oninput="filterDocuments()">
+                </div>
+                <div class="filters">
+                    <select id="typeFilter" onchange="filterDocuments()">
+                        <option value="">Alle types</option>
+                    </select>
+                    <select id="classFilter" onchange="filterDocuments()">
+                        <option value="">Alle classificaties</option>
+                    </select>
+                    <select id="statusFilter" onchange="filterDocuments()">
+                        <option value="">Alle statussen</option>
+                    </select>
+                </div>
+                <div id="docList" class="doc-list"></div>
+            </div>
+        </div>
+
+        <div class="main">
+            <div id="emptyState" class="card empty-state">
+                <h2>Selecteer een document</h2>
+                <p>Kies een document uit de archieflijst om de details te bekijken.</p>
+            </div>
+
+            <div id="detailPanel" class="detail-panel card">
+                <div class="detail-header">
+                    <h2 id="detailTitle" class="detail-title"></h2>
+                    <button class="btn btn-danger" onclick="deleteDocument()" style="padding: 8px 15px;">Archiveren</button>
+                </div>
+
+                <div class="detail-info">
+                    <div><label>Document ID</label><span id="detailId"></span></div>
+                    <div><label>Status</label><span id="detailStatus"></span></div>
+                    <div><label>Auteur</label><span id="detailAuthor"></span></div>
+                    <div><label>Type</label><span id="detailType"></span></div>
+                    <div><label>Classificatie</label><span id="detailClass"></span></div>
+                    <div><label>Aangemaakt</label><span id="detailCreated"></span></div>
+                </div>
+
+                <div class="card">
+                    <h3>Annotaties</h3>
+                    <div id="annotationsList"></div>
+                </div>
+
+                <div class="actions-panel">
+                    <h3>Acties</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newTitle" placeholder="Nieuwe titel..." style="flex: 1;">
+                        <button class="btn btn-secondary" onclick="updateMetadata()">Titel Updaten</button>
+                    </div>
+                    <textarea id="newAnnotation" placeholder="Nieuwe annotatie toevoegen..."></textarea>
+                    <button class="btn btn-secondary" onclick="addAnnotation()" style="width: 100%;">Annotatie Toevoegen</button>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h3>Audit Trail</h3>
+                    <div id="historyList" class="history-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="newDocModal" class="modal">
+        <div class="modal-content">
+            <h2>Nieuw Document Toevoegen</h2>
+            <input type="text" id="newDocTitle" placeholder="Document titel *">
+            <input type="text" id="newDocAuthor" placeholder="Auteur">
+            <select id="newDocType">
+                <option value="">Selecteer type...</option>
+                <option value="Historisch">Historisch</option>
+                <option value="Wetgeving">Wetgeving</option>
+                <option value="Verdrag">Verdrag</option>
+                <option value="Rapport">Rapport</option>
+                <option value="Brief">Brief</option>
+                <option value="Notulen">Notulen</option>
+            </select>
+            <select id="newDocClass">
+                <option value="">Selecteer classificatie...</option>
+                <option value="Nationaal">Nationaal</option>
+                <option value="Internationaal">Internationaal</option>
+                <option value="Grondwet">Grondwet</option>
+                <option value="Defensie">Defensie</option>
+                <option value="Financieel">Financieel</option>
+                <option value="Algemeen">Algemeen</option>
+            </select>
+            <div class="modal-buttons">
+                <button class="btn" onclick="closeModal()">Annuleren</button>
+                <button class="btn btn-primary" onclick="createDocument()">Aanmaken</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allDocuments = [];
+        let currentDocId = null;
+
+        async function loadDocuments() {
+            const res = await fetch('/api/documents');
+            allDocuments = await res.json();
+            renderDocList();
+            loadFilters();
+        }
+
+        async function loadFilters() {
+            const res = await fetch('/api/filters');
+            const filters = await res.json();
+
+            const typeSelect = document.getElementById('typeFilter');
+            const classSelect = document.getElementById('classFilter');
+
+            typeSelect.innerHTML = '<option value="">Alle types</option>' +
+                filters.types.map(t => `<option value="${t}">${t}</option>`).join('');
+            classSelect.innerHTML = '<option value="">Alle classificaties</option>' +
+                filters.classifications.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function filterDocuments() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const type = document.getElementById('typeFilter').value;
+            const classification = document.getElementById('classFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = allDocuments.filter(doc => {
+                const matchSearch = !search || doc.title.toLowerCase().includes(search) || (doc.author && doc.author.toLowerCase().includes(search));
+                const matchType = !type || doc.document_type === type;
+                const matchClass = !classification || doc.classification === classification;
+                const matchStatus = !status || doc.status === status;
+                return matchSearch && matchType && matchClass && matchStatus;
+            });
+
+            renderDocList(filtered);
+        }
+
+        function renderDocList(docs = allDocuments) {
+            const container = document.getElementById('docList');
+            if (docs.length === 0) {
+                container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Geen documenten gevonden</div>';
+                return;
+            }
+            container.innerHTML = docs.map(doc => `
+                <div class="doc-item ${doc.id === currentDocId ? 'active' : ''}" onclick="selectDocument('${doc.id}')">
+                    <h3>${doc.title}</h3>
+                    <div class="doc-meta">
+                        <span class="doc-badge type">${doc.document_type || 'Onbekend'}</span>
+                        <span class="doc-badge class">${doc.classification || 'Algemeen'}</span>
+                        <span class="doc-badge status ${doc.status}">${doc.status === 'active' ? 'Actief' : 'Gearchiveerd'}</span>
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.8em;">${doc.author || 'Onbekende auteur'}</div>
+                </div>
+            `).join('');
+        }
+
+        async function selectDocument(id) {
+            currentDocId = id;
+            filterDocuments();
+
+            const res = await fetch(`/api/documents/${id}`);
+            const doc = await res.json();
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('detailPanel').classList.add('show');
+
+            document.getElementById('detailTitle').textContent = doc.title;
+            document.getElementById('detailId').textContent = doc.id.substring(0, 8) + '...';
+            document.getElementById('detailStatus').textContent = doc.status === 'active' ? 'Actief' : 'Gearchiveerd';
+            document.getElementById('detailStatus').style.color = doc.status === 'active' ? '#000' : '#666';
+            document.getElementById('detailAuthor').textContent = doc.author || 'Onbekend';
+            document.getElementById('detailType').textContent = doc.document_type || '-';
+            document.getElementById('detailClass').textContent = doc.classification || '-';
+            document.getElementById('detailCreated').textContent = new Date(doc.created_at).toLocaleDateString('nl-NL');
+
+            const annotations = doc.annotations || [];
+            document.getElementById('annotationsList').innerHTML = annotations.length > 0
+                ? annotations.map(a => `<div style="border: 1px solid #000; padding: 10px; margin-bottom: 8px;">${a.text} <span style="color: #666; font-size: 0.8em;">- ${a.author || 'Onbekend'}</span></div>`).join('')
+                : '<div style="color: #666;">Geen annotaties</div>';
+
+            renderHistory(doc.history);
+        }
+
+        function renderHistory(history) {
+            const container = document.getElementById('historyList');
+            if (!history || history.length === 0) {
+                container.innerHTML = '<div style="color: #666;">Geen historie</div>';
+                return;
+            }
+            container.innerHTML = history.map(h => `
+                <div class="history-item">
+                    <div class="event-type">${h.event_type}</div>
+                    <div class="event-date">${new Date(h.created_at).toLocaleString('nl-NL')}</div>
+                    <pre>${JSON.stringify(h.payload, null, 2)}</pre>
+                </div>
+            `).join('');
+        }
+
+        async function updateMetadata() {
+            const title = document.getElementById('newTitle').value;
+            if (!title) return alert('Vul een nieuwe titel in');
+
+            await fetch(`/api/documents/${currentDocId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title })
+            });
+
+            document.getElementById('newTitle').value = '';
+            selectDocument(currentDocId);
+            loadDocuments();
+        }
+
+        async function addAnnotation() {
+            const text = document.getElementById('newAnnotation').value;
+            if (!text) return alert('Vul een annotatie in');
+
+            await fetch(`/api/documents/${currentDocId}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event_type: 'AnnotationAdded', payload: { text, author: 'Archivaris' } })
+            });
+
+            document.getElementById('newAnnotation').value = '';
+            selectDocument(currentDocId);
+        }
+
+        async function deleteDocument() {
+            if (!confirm('Weet je zeker dat je dit document wilt archiveren?\n\nHet document wordt gemarkeerd als gearchiveerd maar blijft volledig traceerbaar via de audit trail.')) return;
+
+            await fetch(`/api/documents/${currentDocId}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event_type: 'DocumentDeleted', payload: { reason: 'Archiveringsverzoek via web interface' } })
+            });
+
+            selectDocument(currentDocId);
+            loadDocuments();
+        }
+
+        function showNewDocModal() {
+            document.getElementById('newDocModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('newDocModal').classList.remove('show');
+        }
+
+        async function createDocument() {
+            const title = document.getElementById('newDocTitle').value;
+            const author = document.getElementById('newDocAuthor').value;
+            const type = document.getElementById('newDocType').value;
+            const classification = document.getElementById('newDocClass').value;
+
+            if (!title) return alert('Vul een titel in');
+
+            await fetch('/api/documents', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, author, document_type: type, classification })
+            });
+
+            closeModal();
+            document.getElementById('newDocTitle').value = '';
+            document.getElementById('newDocAuthor').value = '';
+            document.getElementById('newDocType').value = '';
+            document.getElementById('newDocClass').value = '';
+
+            await loadDocuments();
+        }
+
+        loadDocuments();
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: eventstore
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # 1. Add a healthcheck to verify Postgres is ready to accept connections
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d eventstore"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  app:
+    image: node:18-alpine
+    command: sh -c "npm install && node server.js"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    # 2. Tell the app to wait until the db healthcheck passes
+    depends_on:
+      db:
+        condition: service_healthy
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager

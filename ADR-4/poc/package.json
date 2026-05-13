@@ -1,0 +1,10 @@
+{
+  "name": "poc-event-sourcing",
+  "version": "1.0.0",
+  "description": "Proof of Concept: Event Sourcing in PostgreSQL",
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.11.3",
+    "uuid": "^9.0.0"
+  }
+}
