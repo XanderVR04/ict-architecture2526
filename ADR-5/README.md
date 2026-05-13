@@ -9,7 +9,7 @@ De toegang is rolgebaseerd:
 - **Onderzoekers / Archivarissen** kunnen documenten uploaden, bewerken en OCR-processen aansturen.
 - **Het Publiek** mag enkel gevalideerde en vrijgegeven documenten inzien.
 
-De POC demonstreert het architectuurpatroon uit [ADR-005](docs/adr/ADR-005-central-auth.md): een centrale Identity Provider (**Keycloak**) die via OAuth2/OIDC communiceert met een Python API, waarbij Role-Based Access Control (RBAC) wordt afgedwongen.
+De POC demonstreert het architectuurpatroon uit [ADR-005](README.md): een centrale Identity Provider (**Keycloak**) die via OAuth2/OIDC communiceert met een Python API, waarbij Role-Based Access Control (RBAC) wordt afgedwongen.
 
 ---
 
@@ -31,7 +31,7 @@ De onderstaande diagrammen zijn opgesteld volgens het **C4-model** en opgebouwd 
 
 ### Systeemcontextdiagram
 
-![Systeemcontextdiagram](docs/c4-model/systemcontextdiagram.png)
+![Systeemcontextdiagram](c4-model/systemcontextdiagram.png)
 
 ```dsl
 workspace {
@@ -79,7 +79,7 @@ workspace {
 
 ### Containerdiagram
 
-![Containerdiagram](docs/c4-model/containerdiagram.png)
+![Containerdiagram](c4-model/containerdiagram.png)
 
 ```dsl
 workspace {
@@ -130,7 +130,7 @@ workspace {
 
 ### Deployment diagram
 
-![Deployment diagram](docs/c4-model/deploymentdiagram.png)
+![Deployment diagram](c4-model/deploymentdiagram.png)
 
 ```dsl
 workspace {
@@ -228,17 +228,17 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 
 | Document | Beschrijving |
 |---|---|
-| [ADR-005](docs/adr/ADR-005-central-auth.md) | Architectuurbeslissing: Keycloak als centrale IdP (MADR-formaat) |
-| [Systeemcontextdiagram (DSL)](docs/c4-model/system-context.dsl) | C4 systeemcontextdiagram in Structurizr DSL |
-| [Systeemcontextdiagram (PNG)](docs/c4-model/systemcontextdiagram.png) | Visuele weergave van de systeemcontext |
-| [Containerdiagram (DSL)](docs/c4-model/container.dsl) | C4 containerdiagram in Structurizr DSL |
-| [Containerdiagram (PNG)](docs/c4-model/containerdiagram.png) | Visuele weergave van de containerarchitectuur |
-| [Deploymentdiagram (DSL)](docs/c4-model/deployment.dsl) | C4 deployment diagram in Structurizr DSL |
-| [Deploymentdiagram (PNG)](docs/c4-model/deploymentdiagram.png) | Visuele weergave van de deploymentarchitectuur |
+| [ADR-005](README.md) | Architectuurbeslissing: Keycloak als centrale IdP (MADR-formaat) |
+| [Systeemcontextdiagram (DSL)](c4-model/system-context.dsl) | C4 systeemcontextdiagram in Structurizr DSL |
+| [Systeemcontextdiagram (PNG)](c4-model/systemcontextdiagram.png) | Visuele weergave van de systeemcontext |
+| [Containerdiagram (DSL)](c4-model/container.dsl) | C4 containerdiagram in Structurizr DSL |
+| [Containerdiagram (PNG)](c4-model/containerdiagram.png) | Visuele weergave van de containerarchitectuur |
+| [Deploymentdiagram (DSL)](c4-model/deployment.dsl) | C4 deployment diagram in Structurizr DSL |
+| [Deploymentdiagram (PNG)](c4-model/deploymentdiagram.png) | Visuele weergave van de deploymentarchitectuur |
 
 ### Kernbeslissing
 
-**[ADR-005](docs/adr/ADR-005-central-auth.md)** beschrijft de keuze voor Keycloak als centrale Identity Provider boven een zelfgebouwde authenticatieservice. De voornaamste redenen zijn:
+**[ADR-005](README.md)** beschrijft de keuze voor Keycloak als centrale Identity Provider boven een zelfgebouwde authenticatieservice. De voornaamste redenen zijn:
 
 - **Security:** bewezen protocollen (JWT, OIDC) worden gebruikt in plaats van risicovolle eigen implementaties.
 - **Extensibility:** nieuwe microservices integreren door simpelweg tokens te valideren tegen de centrale IdP.
