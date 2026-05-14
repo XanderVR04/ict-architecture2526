@@ -20,7 +20,7 @@ Hierdoor is het onmogelijk om per ongeluk data te verliezen of te overschrijven:
 
 3. **Bezoek de Web Applicatie:**
    Open je browser en ga naar:  
-   👉 **http://localhost:3000**
+   **http://localhost:3000**
    
    *(Geef het systeem enkele seconden om de container te starten en de npm packages te installeren)*
 

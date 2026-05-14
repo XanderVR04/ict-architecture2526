@@ -1,10 +1,8 @@
 services:
   db:
     image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: eventstore
+    env_file:
+      - .env
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     # 1. Add a healthcheck to verify Postgres is ready to accept connections

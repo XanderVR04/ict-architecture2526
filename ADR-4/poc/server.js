@@ -7,11 +7,11 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const client = new Client({
-    user: 'user',
-    host: 'db',
-    database: 'eventstore',
-    password: 'password',
-    port: 5432,
+    user: process.env.DB_USER || 'user',
+    host: process.env.DB_HOST || 'db',
+    database: process.env.DB_NAME || 'eventstore',
+    password: process.env.DB_PASSWORD || 'password',
+    port: parseInt(process.env.DB_PORT) || 5432,
 });
 
 async function initDB() {
@@ -19,10 +19,10 @@ async function initDB() {
     while (retries > 0) {
         try {
             await client.connect();
-            console.log("✅ Connected to PostgreSQL");
+            console.log("Connected to PostgreSQL");
             break;
         } catch (err) {
-            console.log("⏳ Waiting for database...");
+            console.log("Waiting for database...");
             retries -= 1;
             await new Promise(res => setTimeout(res, 2000));
         }
@@ -245,6 +245,7 @@ app.put('/api/documents/:id', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log('🚀 National Archive running on http://localhost:3000');
+const PORT = process.env.APP_PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`National Archive running on http://localhost:${PORT}`);
 });
