@@ -1,66 +1,32 @@
-# ICT Architecture - Document Archief Systeem (Geconsolideerde Documentatie)
+# Document Archief Systeem - Data-integriteit en Versioning
 
-Dit document bevat de volledige architecturale documentatie van het Document Archief Systeem, inclusief de gedetailleerde Architecture Decision Records (ADR's) en de bijbehorende C4-modellen.
+## Projectbeschrijving
 
----
+Dit project is een Proof of Concept (POC) voor de ICT Architecture projectopdracht. Het toont een **Document Archief Systeem** voor het digitaliseren en beheren van historische documenten, waarin de onschendbaarheid van historische data voorop staat.
 
-## 1. Project Overview
-
-Dit project implementeert een **Document Archief Systeem** voor het digitaliseren en beheren van historische documenten. Het systeem richt zich specifiek op onderzoekers en archivarissen die metadata bewerken, documenten raadplegen en annotaties toevoegen. De kernwaarde van het systeem is de onschendbaarheid van de historische data.
+Het systeem richt zich op onderzoekers en archivarissen die metadata bewerken, documenten raadplegen en annotaties toevoegen. De POC demonstreert het architectuurpatroon uit [ADR-004](README.md#adr-004-aanpak-voor-data-integriteit-en-versioning): Event Sourcing (Append-Only Log) met PostgreSQL.
 
 ---
 
-## 2. Architecture Decision Records
+## Architectuuroverzicht
 
-### ADR-004: Aanpak voor Data-integriteit en Versioning
+De architectuur bestaat uit drie containers die samenwerken:
 
-**Status:** Accepted  
-**Datum:** 7 mei 2026
-
-#### 2.1 Context
-Historische documenten zijn onvervangbaar en kritisch. Binnen ons systeem moeten we te allen tijde vermijden dat data per ongeluk overschreven of verwijderd wordt ("geen dataverlies"). Tegelijk vereisen onderzoekers en archivarissen een volledige audit trail (wie heeft wat wanneer aangepast) en de mogelijkheid tot versioning van zowel metadata als annotaties.
-
-In **ADR-002** (Gescheiden Opslagstrategie) is reeds de keuze gemaakt om een relationele database (PostgreSQL) in te zetten voor de verwerking van metadata. Om de data-integriteit binnen deze component te waarborgen zonder de complexiteit van de technologie-stack onnodig te vergroten, hebben we een strategie nodig voor de manier waarop we data opslaan.
-
-#### 2.2 Decision
-We kiezen ervoor om het **Event Sourcing (Append-Only Log) patroon** toe te passen binnen PostgreSQL voor het beheer van de metadata en document-wijzigingen.
-
-In plaats van tabellen destructief aan te passen (`UPDATE` of `DELETE`), wordt elke wijziging in de levenscyclus van een document (bijv. `DocumentCreated`, `MetadataUpdated`, `AnnotationAdded`) opgeslagen als een onveranderlijk (immutable) nieuw "event" in een append-only tabel.
-
-#### 2.3 Considered options
-
-**1. Klassieke CRUD (Create, Read, Update, Delete) met Audit Table**  
-Elke wijziging past de hoofd-tabel aan, en een database-trigger schrijft de oude staat naar een aparte `audit_log` tabel.
-*   **Voordelen:** Eenvoudig op te zetten; queries voor de huidige staat zijn zeer performant.
-*   **Nadelen:** Data overschrijving op de hoofdtabel riskeert dataverlies; audit logs zijn vaak geen 'source of truth'.
-
-**2. Event Sourcing met PostgreSQL (Append-Only) - *Gekozen***  
-Alle wijzigingen worden als een reeks acties in de tijd opgeslagen in één `events` tabel. De huidige staat (de "projectie") wordt berekend door de events op volgorde af te spelen.
-*   **Voordelen:** 100% data-integriteit; events zijn *immutable*; out-of-the-box audit log en perfecte versioning; gebruikt bestaande PostgreSQL technologie.
-*   **Nadelen:** Bevragen van huidige staat vereist complexere code (Projection Engine).
-
-**3. Dedicated Event Store (bijv. EventStoreDB of Kafka)**  
-Specifieke databases ontworpen voor Event Sourcing.
-*   **Voordelen:** Afgestemd op extreem hoge writes en event-streams.
-*   **Nadelen:** Introduceert een nieuwe technologie en operationele overhead; niet gerechtvaardigd voor metadata volume.
-
-#### 2.4 Rationale
-De onvervangbaarheid van historische documenten (Data-integriteit) weegt het zwaarst. Het Event Sourcing patroon geeft de garantie dat we elke tussenstap van een document (van eerste upload, door de OCR, tot de correcties van de archivaris) exact kunnen herleiden. Omdat we reeds gekozen hebben voor PostgreSQL, kunnen we gebruik maken van diens krachtige `JSONB` ondersteuning om variërende payloads van events flexibel op te slaan.
-
-#### 2.5 Consequences
-*   **Positief:** Strikte databeveiliging en integriteit; volledig inzicht in de levensloop van documenten; naadloze integratie met bestaande Node.js/PostgreSQL stack.
-*   **Negatief:** Complexiteit bij het bevragen van data; noodzaak voor een gesynchroniseerd Read-model (CQRS), wat kan zorgen voor 'eventual consistency' in de UI.
+```
+Gebruiker  -->  Web Applicatie        toegang tot interface (HTML5 / Vanilla JS)
+Gebruiker  -->  Metadata Service       REST API voor events en projecties (Node.js / Express)
+Metadata Service  -->  PostgreSQL       Append-Only Event Store + Read Model (PostgreSQL)
+```
 
 ---
 
-## 3. C4 Architecturale Diagrammen
+## C4 Diagrammen
 
-Hieronder staan de drie gevraagde C4-modellen in Structurizr DSL formaat, die de implementatie van bovenstaande beslissingen visualiseren.
+De onderstaande diagrammen zijn opgesteld volgens het **C4-model** en opgebouwd met **Structurizr DSL**.
 
-### 3.1 Systeemcontextdiagram
-Toont de interactie tussen de Onderzoeker/Archivaris en het Document Archief Systeem in de bredere context.
+### Systeemcontextdiagram
 
-<img src="C4-Systeemcontect.png"/>
+![Systeemcontextdiagram](C4-Systeemcontect.png)
 
 ```structurizr
 workspace "Document Archief" "Systeemcontext" {
@@ -80,10 +46,9 @@ workspace "Document Archief" "Systeemcontext" {
 }
 ```
 
-### 3.2 Containerdiagram
-Toont de technische bouwblokken en de interactie tussen de Metadata Service en de Event Store.
+### Containerdiagram
 
-<img src="C4-Container_Diagram.png" />
+![Containerdiagram](C4-Container_Diagram.png)
 
 ```structurizr
 workspace "Document Archief" "Container Diagram" {
@@ -118,11 +83,9 @@ workspace "Document Archief" "Container Diagram" {
 }
 ```
 
+### Deployment diagram
 
-### 3.3 Deployment Diagram
-Visualiseert de distributie van de containers over de Docker Swarm cluster (3 managers, 2 workers).
-
-<img src="C4-Deployment_Diagram.png" />
+![Deployment diagram](C4-Deployment_Diagram.png)
 
 ```structurizr
 workspace "Document Archief" "Deployment Diagram" {
@@ -169,31 +132,146 @@ workspace "Document Archief" "Deployment Diagram" {
 
 ---
 
-## 4. Project Structuur
+## Technologiestack
 
-De fysieke organisatie van het project is als volgt:
+| Technologie          | Rol                                                   |
+|---------------------|-------------------------------------------------------|
+| Vanilla JS / HTML5  | Frontend webinterface                                 |
+| Node.js / Express   | Metadata Management Service (REST API)                |
+| PostgreSQL          | Event Store (append-only) + Read Model               |
+| Docker Swarm        | Orkestratie van containers via een stack             |
+
+---
+
+## Mappenstructuur
 
 ```
-03_opdracht/
-├── ADR-004-Data-Integriteit-en-Versioning.md  # Gedetailleerde ADR (los bestand)
-├── README.md                                  # Hoofddocumentatie (overzicht)
-├── Architectuur-Documentatie-Compleet.md      # Geconsolideerde versie (dit bestand)
-├── poc_data_integrity/                        # Proof of Concept implementatie
-│   ├── server.js                              # Node.js backend met Event Sourcing logica
-│   ├── init.sql                               # Database schema voor de Event Store
-│   ├── poc.yaml                               # Docker stack definitie
-│   └── public/index.html                      # Frontend interface voor de POC
-├── Container_Event_Sourcing-dark.png          # Visualisatie van de architectuur
-└── les/                                       # Lesmateriaal en achtergrondinformatie
+ADR-004-Data-Integriteit-en-Versioning/
+├── README.md                                 # Dit bestand (overzicht en documentatie)
+├── C4-Systeemcontect.png                    # Visueel systeemcontextdiagram
+├── C4-Container_Diagram.png                 # Visueel containerdiagram
+├── C4-Deployment_Diagram.png                # Visueel deploymentdiagram
+└── poc/                                      # Proof of Concept implementatie
+    ├── server.js                             # Node.js backend met Event Sourcing logica
+    ├── init.sql                              # Database schema voor de Event Store
+    ├── poc.yaml                              # Docker Swarm stack definitie
+    ├── public/
+    │   └── index.html                        # Frontend interface voor de POC
+    └── README.md                             # Opstartinstructies voor de POC
 ```
 
 ---
 
-## 5. Proof of Concept
+## POC
 
-Er is een werkende Proof of Concept beschikbaar in de directory `poc_data_integrity/`. Deze POC demonstreert de praktische werking van het Event Sourcing patroon met PostgreSQL:
-- Elke wijziging resulteert in een nieuw event (`INSERT`).
-- Verwijderingen zijn logisch en behouden de volledige geschiedenis.
-- De huidige staat van een document wordt real-time geprojecteerd vanuit de event-stream.
+Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/README.md).
 
-Zie de `README.md` in de POC-folder voor specifieke instructies over het draaien van de stack in een Docker Swarm omgeving.
+---
+
+## Documentatie
+
+| Document                      | Beschrijving                                                    |
+|-------------------------------|-----------------------------------------------------------------|
+| [ADR-004](README.md)          | Architectuurbeslissing: Event Sourcing met PostgreSQL (MADR)   |
+
+### Kernbeslissing
+
+**[ADR-004](README.md)** beschrijft de keuze voor het Event Sourcing patroon om data-integriteit te waarborgen. De voornaamste redenen zijn:
+
+- **Data-integriteit:** Elke wijziging wordt als immutable event opgeslagen; destructieve operaties zijn onmogelijk.
+- **Auditability:** Volledige historie van elk document (van upload tot correcties) is te herleiden.
+- **Versioning:** Out-of-the-box versiegeschiedenis van metadata en annotaties.
+
+---
+
+# ADR-004: Aanpak voor Data-integriteit en Versioning
+
+> Dit ADR volgt het **MADR-formaat** (Markdown Architectural Decision Records, v3.0.0).
+> Referentie: <https://adr.github.io/madr/>
+
+**Status:** Accepted
+**Datum:** 2026-05-07
+
+---
+
+## Context en Probleemstelling
+
+Historische documenten zijn onvervangbaar en kritisch. Binnen het systeem moet te allen tijde worden vermeden dat data per ongeluk overschreven of verwijderd wordt ("geen dataverlies"). Tegelijk vereisen onderzoekers en archivarissen een volledige audit trail (wie heeft wat wanneer aangepast) en de mogelijkheid tot versioning van zowel metadata als annotaties.
+
+In **ADR-002** (Gescheiden Opslagstrategie) is reeds de keuze gemaakt om een relationele database (PostgreSQL) in te zetten voor de verwerking van metadata. Om de data-integriteit binnen deze component te waarborgen zonder de complexiteit van de technologie-stack onnodig te vergroten, is een strategie nodig voor de manier waarop data wordt opgeslagen.
+
+**Beslissingsvraag:** Hoe waarborgen we data-integriteit en versioning binnen PostgreSQL zonder onnodige complexiteit?
+
+---
+
+## Overwogen Opties
+
+1. Klassieke CRUD (Create, Read, Update, Delete) met Audit Table
+2. **Event Sourcing met PostgreSQL (Append-Only)** *(gekozen)*
+3. Dedicated Event Store (bijv. EventStoreDB of Kafka)
+
+---
+
+## Beslissingsresultaat
+
+**Gekozen optie: Event Sourcing met PostgreSQL (Append-Only)**
+
+We kiezen ervoor om het **Event Sourcing (Append-Only Log) patroon** toe te passen binnen PostgreSQL voor het beheer van de metadata en document-wijzigingen.
+
+In plaats van tabellen destructief aan te passen (`UPDATE` of `DELETE`), wordt elke wijziging in de levenscyclus van een document (bijv. `DocumentCreated`, `MetadataUpdated`, `AnnotationAdded`) opgeslagen als een onveranderlijk (immutable) nieuw "event" in een append-only tabel.
+
+### Positieve gevolgen
+
+- Strikte databeveiliging en integriteit; elke wijziging is traceerbaar
+- Volledig inzicht in de levensloop van documenten (audit trail)
+- Naadloze integratie met bestaande Node.js/PostgreSQL stack
+- Out-of-the-box versioning van metadata en annotaties
+
+### Negatieve gevolgen
+
+- Complexiteit bij het bevragen van data (Projection Engine nodig)
+- Noodzaak voor een gesynchroniseerd Read-model (CQRS)
+- 'Eventual consistency' in de UI kan optreden
+
+---
+
+## Vergelijking van Opties
+
+### Optie 1: Klassieke CRUD met Audit Table
+
+| | |
+|---|---|
+| **Voordeel** | Eenvoudig op te zetten; queries voor de huidige staat zijn zeer performant |
+| **Nadeel** | Data overschrijving op de hoofdtabel riskeert dataverlies; audit logs zijn vaak geen 'source of truth' |
+
+### Optie 2: Event Sourcing met PostgreSQL (Append-Only) ✓
+
+| | |
+|---|---|
+| **Voordeel** | 100% data-integriteit; events zijn immutable; out-of-the-box audit log en perfecte versioning; gebruikt bestaande PostgreSQL technologie |
+| **Nadeel** | Bevragen van huidige staat vereist complexere code (Projection Engine) |
+
+### Optie 3: Dedicated Event Store
+
+| | |
+|---|---|
+| **Voordeel** | Afgestemd op extreem hoge writes en event-streams |
+| **Nadeel** | Introduceert een nieuwe technologie en operationele overhead; niet gerechtvaardigd voor metadata volume |
+
+---
+
+## Rationale (link met driving characteristics)
+
+De keuze voor Event Sourcing ondersteunt de kernkwaliteiten van het systeem:
+
+- **Data-integriteit:** De onvervangbaarheid van historische documenten weegt het zwaarst. Het Event Sourcing patroon geeft de garantie dat elke tussenstap van een document (van eerste upload, door de OCR, tot de correcties van de archivaris) exact kan worden herleid.
+- **Auditability:** Events zijn immutable en vormen de single source of truth.
+- **Extensibility:** Omdat we reeds gekozen hebben voor PostgreSQL, kunnen we gebruik maken van krachtige `JSONB` ondersteuning om variërende payloads van events flexibel op te slaan.
+
+---
+
+## Gevolgen
+
+- **Architecturaal:** PostgreSQL fungeert als Event Store (append-only tabel) en bevat tegelijk het Read Model (huidige document status).
+- **Ontwikkeling:** Elke wijziging wordt als INSERT naar de events-tabel geschreven; een Projection Engine berekent de huidige staat.
+- **Infrastructuur:** Geen nieuwe technologie nodig; volledig gebaseerd op bestaande PostgreSQL-instantie uit ADR-002.
