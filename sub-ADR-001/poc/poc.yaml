@@ -6,14 +6,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER_FILE: /run/secrets/rabbitmq_user
-      RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_pass
     networks:
       - poc-net
-    secrets:
-      - rabbitmq_user
-      - rabbitmq_pass
+    configs:
+      - source: rabbitmq_conf
+        target: /etc/rabbitmq/rabbitmq.conf
 
   uploader:
     image: jessebracque/poc-uploader:1.0
@@ -54,3 +51,5 @@ secrets:
 configs:
   rabbitmq_host:
     file: ./configs/rabbitmq_host.txt
+  rabbitmq_conf:
+    file: ./configs/rabbitmq.conf

@@ -14,6 +14,9 @@ Open twee terminal windows. Type in het eerste eerst dit, waarbij de eerste drie
 4) notepad .\secrets\rabbitmq_user.txt
 5) notepad .\secrets\rabbitmq_pass.txt
 6) notepad .\configs\rabbitmq_host.txt
+7) notepad .\configs\rabbitmq.conf
+
+Let op: de waarden in `rabbitmq.conf` moeten overeenkomen met de secrets.
 
 Voer dan deze uit, want die moeten telkens maal opnieuw worden uitgevoerd als de POC gebruikt wordt:
 
