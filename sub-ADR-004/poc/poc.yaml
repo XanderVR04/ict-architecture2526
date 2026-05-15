@@ -25,9 +25,9 @@ services:
       - .:/app
     working_dir: /app
     # 2. Tell the app to wait until the db healthcheck passes
-    depends_on:
-      - db:
-        condition: service_healthy
+    # depends_on:
+    #   - db:
+    #     condition: service_healthy
     deploy:
       placement:
         constraints:
