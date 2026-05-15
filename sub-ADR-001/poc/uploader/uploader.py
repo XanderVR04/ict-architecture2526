@@ -3,11 +3,18 @@ import time
 
 import pika
 
+def read_file_value(path, fallback):
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return file.read().strip() or fallback
+    except OSError:
+        return fallback
+
 # Voor flexibiliteit worden de RabbitMQ-verbinding parameters uit omgevingsvariabelen gehaald,
-# met standaardwaarden voor het geval dat deze niet zijn ingesteld.
-host = os.getenv("RABBITMQ_HOST", "rabbitmq")
-user = os.getenv("RABBITMQ_USER", "user")
-password = os.getenv("RABBITMQ_PASS", "pass")
+# met fallback naar Swarm configs/secrets.
+host = os.getenv("RABBITMQ_HOST") or read_file_value("/run/configs/rabbitmq_host", "rabbitmq")
+user = os.getenv("RABBITMQ_USER") or read_file_value("/run/secrets/rabbitmq_user", "user")
+password = os.getenv("RABBITMQ_PASS") or read_file_value("/run/secrets/rabbitmq_pass", "pass")
 
 # De credentials en connection parameters worden ingesteld voor het verbinden met RabbitMQ.
 # De credentials zijn bedoeld als authenticatie, en de heartbeat helpt bij 

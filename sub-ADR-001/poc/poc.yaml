@@ -7,33 +7,50 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER_FILE: /run/secrets/rabbitmq_user
+      RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_pass
     networks:
       - poc-net
+    secrets:
+      - rabbitmq_user
+      - rabbitmq_pass
 
   uploader:
     image: poc-uploader
-    environment:
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
     networks:
       - poc-net
     deploy:
       replicas: 1
+    secrets:
+      - rabbitmq_user
+      - rabbitmq_pass
+    configs:
+      - source: rabbitmq_host
+        target: /run/configs/rabbitmq_host
 
   processor:
     image: poc-processor
-    environment:
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
     networks:
       - poc-net
     deploy:
       replicas: 1
+    secrets:
+      - rabbitmq_user
+      - rabbitmq_pass
+    configs:
+      - source: rabbitmq_host
+        target: /run/configs/rabbitmq_host
 
 networks:
   poc-net:
     driver: overlay
+
+secrets:
+  rabbitmq_user:
+    file: ./secrets/rabbitmq_user.txt
+  rabbitmq_pass:
+    file: ./secrets/rabbitmq_pass.txt
+
+configs:
+  rabbitmq_host:
+    file: ./configs/rabbitmq_host.txt
