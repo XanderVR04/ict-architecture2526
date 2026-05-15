@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historisch Archief - JSON Ingest</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        .section { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+        input[type="text"] { width: 70%; padding: 10px; margin-bottom: 10px;}
+        button { padding: 10px 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px; }
+        .search-btn { background: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>Microservices JSON Ingest</h1>
+
+    <div class="section">
+        <h3>1. Simuleer OCR Service (Send JSON)</h3>
+        <input type="text" id="doc_titel" placeholder="Document Titel..."><br>
+        <textarea id="doc_tekst" placeholder="OCR resultaat tekst hier..."></textarea><br>
+        <button onclick="sendJson()">Verstuur JSON naar Search Service</button>
+        <p id="uploadStatus"></p>
+    </div>
+
+    <div class="section">
+        <h3>2. Zoeken</h3>
+        <input type="text" id="query" placeholder="Zoekterm...">
+        <button class="search-btn" onclick="doSearch()">Zoeken</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function sendJson() {
+    // Sla de elementen op in variabelen
+    const titelInput = document.getElementById('doc_titel');
+    const tekstInput = document.getElementById('doc_tekst');
+    const statusLabel = document.getElementById('uploadStatus');
+
+    const payload = {
+        titel: titelInput.value,
+        tekst: tekstInput.value,
+        metadata: { bron: "PoC_Interface", type: "OCR_Simulatie" }
+    };
+
+    try {
+        const res = await fetch('/ingest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.status === "succes") {
+            // Maak de velden leeg
+            titelInput.value = "";
+            tekstInput.value = "";
+            statusLabel.innerText = "Status: succes (ID: " + data.id + ")";
+            statusLabel.style.color = "green";
+        } else {
+            statusLabel.innerText = "Fout: " + data.message;
+            statusLabel.style.color = "red";
+        }
+    } catch (error) {
+        statusLabel.innerText = "Netwerkfout: " + error;
+        statusLabel.style.color = "red";
+    }
+}
+
+        async function doSearch() {
+            const q = document.getElementById('query').value;
+            const res = await fetch(`/search?q=${q}`);
+            const data = await res.json();
+            
+            let html = '<h4>Resultaten:</h4>';
+            data.forEach(hit => {
+                html += `<div style="background:#f4f4f4; padding:10px; margin-top:10px; border-left: 5px solid #007bff;">
+                            <strong>${hit._source.titel}</strong> (Score: ${hit._score})<br>
+                            <p>${hit._source.tekst}</p>
+                         </div>`;
+            });
+            document.getElementById('results').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
