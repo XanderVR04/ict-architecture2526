@@ -29,7 +29,7 @@ services:
     image: python:3.11-slim
     command: sh -c "pip install flask 'PyJWT[crypto]' requests --quiet && python /app.py"
     environment:
-      KEYCLOAK_URL: http://keycloak:8081
+      KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: archief-realm
     configs:
       - source: flask_app
