@@ -1,0 +1,18 @@
+{
+  "titel": "Top Secret Report: Enigma Deciphering",
+  "tekst": "We have successfully decoded the latest German naval transmissions using the Bombe machines. The synchronization of the rotors remains the biggest challenge for the operators at Hut 8."
+}
+
+
+
+{
+  "titel": "Letter to Winston Churchill",
+  "tekst": "Dear Prime Minister, our progress at Bletchley Park is hindered by a lack of personnel. We require more mathematicians to break the new Lorenz cipher used by the German High Command."
+}
+
+
+
+{
+  "titel": "Colossus Operations Log - 1944",
+  "tekst": "Vacuum tube failure in Rack 4. The statistical analysis of the Teletype transmissions is proceeding slowly. Maintenance is required on the paper tape reader to prevent tearing."
+}
