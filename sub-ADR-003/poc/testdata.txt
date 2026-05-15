@@ -16,3 +16,9 @@
   "titel": "Colossus Operations Log - 1944",
   "tekst": "Vacuum tube failure in Rack 4. The statistical analysis of the Teletype transmissions is proceeding slowly. Maintenance is required on the paper tape reader to prevent tearing."
 }
+
+
+{
+  "titel": "Ma1ntenance L0g - Hut 8",
+  "tekst": "Th3 B0mbe machjne at Hvt 8 1s experjencing jssues wjth the r0t0rs. Urgent r3pair n33ded t0 pr3v3nt d31ays jn d3c0ding."
+}
