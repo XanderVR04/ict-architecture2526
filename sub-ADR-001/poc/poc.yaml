@@ -16,7 +16,7 @@ services:
       - rabbitmq_pass
 
   uploader:
-    image: poc-uploader
+    image: jessebracque/poc-uploader:1.0
     networks:
       - poc-net
     deploy:
@@ -29,7 +29,7 @@ services:
         target: /run/configs/rabbitmq_host
 
   processor:
-    image: poc-processor
+    image: jessebracque/poc-processor:1.0
     networks:
       - poc-net
     deploy:
