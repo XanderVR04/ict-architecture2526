@@ -8,4 +8,4 @@ CMD ["python", "app.py"]
 
 # Usage (local build, alternative to the Docker Swarm config approach in poc.yaml):
 #   docker build -t archief-api .
-#   docker run -p 5000:5000 -e KEYCLOAK_URL=http://localhost:8080 archief-api
+#   docker run -p 6000:5000 -e KEYCLOAK_URL=http://localhost:8080 archief-api

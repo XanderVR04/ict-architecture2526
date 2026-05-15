@@ -10,7 +10,7 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
     ports:
-      - "8080:8080"
+      - "8081:8080"
     configs:
       - source: keycloak_realm
         target: /opt/keycloak/data/import/realm-export.json
@@ -29,7 +29,7 @@ services:
     image: python:3.11-slim
     command: sh -c "pip install flask 'PyJWT[crypto]' requests --quiet && python /app.py"
     environment:
-      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_URL: http://keycloak:8081
       KEYCLOAK_REALM: archief-realm
     configs:
       - source: flask_app
@@ -37,7 +37,7 @@ services:
       - source: flask_html
         target: /public/index.html
     ports:
-      - "5000:5000"
+      - "5001:5000"
     networks:
       - archief-net
     deploy:
