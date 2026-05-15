@@ -6,18 +6,18 @@ De OCR wordt gesimuleerd door `time.sleep(5)` in [ADR-2/poc-rabbitmq/processor/p
 
 ## Run (lokale single-node swarm)
 
-Open twee terminal windows. Type in het eerste eerst dit, waarbij de eerste twee commando's enkel eenmalig uitgevoerd moeten worden:
+Open twee terminal windows. Type in het eerste eerst dit, waarbij de eerste twee commando's enkel eenmalig uitgevoerd moeten worden. Zie ook dat je in de juiste map bent genavigeerd:
 
 1) copy .env.example .env
 2) docker swarm init
+3) docker build -t poc-uploader ./uploader
+4) docker build -t poc-processor ./processor
 
 Voer dan deze uit, want die moeten telkens maal opnieuw worden uitgevoerd als de POC gebruikt wordt:
 
-1) docker build -t poc-uploader ./uploader
-2) docker build -t poc-processor ./processor
-3) docker stack deploy -c poc.yaml poc
-4) docker service ls
-5) docker service logs -f poc_uploader
+1) docker stack deploy -c poc.yaml poc
+2) docker service ls
+3) docker service logs -f poc_uploader
 
 En daarna in het tweede dit:
 
