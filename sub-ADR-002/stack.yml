@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  minio:
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - type: bind
+        source: /data/minio
+        target: /data
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    deploy:
+      replicas: 1
+      endpoint_mode: vip
+      placement:
+        constraints:
+          - node.hostname == 2526-ICT-arch-nick-reul
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - type: bind
+        source: /data/postgres
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: ./init
+        target: /docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    deploy:
+      replicas: 1
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - type: bind
+        source: /data/pgadmin
+        target: /var/lib/pgadmin
+    ports:
+      - "8080:80"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == 2526-ICT-arch-nick-reul
