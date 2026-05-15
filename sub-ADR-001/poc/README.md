@@ -6,7 +6,7 @@ De OCR wordt gesimuleerd door `time.sleep(5)` in [ADR-2/poc-rabbitmq/processor/p
 
 ## Run (lokale single-node swarm)
 
-Open twee terminal windows. Type in het eerste eerst dit, waarbij de eerste twee commando's enkel eenmalig uitgevoerd moet worden:
+Open twee terminal windows. Type in het eerste eerst dit, waarbij de eerste twee commando's enkel eenmalig uitgevoerd moeten worden:
 
 1) copy .env.example .env
 2) docker swarm init
