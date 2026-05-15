@@ -1,6 +1,6 @@
 .env
 __pycache__/
+*.pyc
+.DS_Store
 venv/
-# config van server
-./Bletchley-cloud-config
-
+bletchley.ovpn

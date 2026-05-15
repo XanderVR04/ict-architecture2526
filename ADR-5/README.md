@@ -1,4 +1,4 @@
-# POC: Centraal Authenticatie- en Autorisatiebeheer
+# Centraal Authenticatie- en Autorisatiebeheer
 
 ## Projectbeschrijving
 
