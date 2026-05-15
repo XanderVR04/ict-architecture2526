@@ -1,1 +1,1 @@
-poc_rabbitmq
+poc_rabbitmq.
