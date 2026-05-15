@@ -4,7 +4,10 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
     environment:
-      - ES_JAVA_OPTS=-Xms${ES_MEM_LIMIT} -Xmx${ES_MEM_LIMIT}
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
     deploy:
