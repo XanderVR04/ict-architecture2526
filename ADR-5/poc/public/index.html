@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Keycloak RBAC POC</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+    h1 { color: #333; }
+    p.sub { color: #666; margin-top: -10px; }
+    .card { background: white; border-radius: 8px; padding: 20px; margin: 16px 0; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+    .card h3 { margin-top: 0; }
+    button { padding: 10px 22px; margin: 6px 4px; cursor: pointer; border: none; border-radius: 5px; font-size: 14px; font-weight: bold; }
+    .btn-green  { background: #28a745; color: white; }
+    .btn-yellow { background: #e0a800; color: white; }
+    .btn-red    { background: #dc3545; color: white; }
+    .result { margin-top: 14px; padding: 12px 16px; border-radius: 6px; font-family: monospace; font-size: 13px; white-space: pre-wrap; display: none; }
+    .ok   { background: #d4edda; border-left: 4px solid #28a745; }
+    .warn { background: #fff3cd; border-left: 4px solid #e0a800; }
+    .err  { background: #f8d7da; border-left: 4px solid #dc3545; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+    .b201 { background: #28a745; color: white; }
+    .b403 { background: #e0a800; color: white; }
+    .b401 { background: #dc3545; color: white; }
+    .b503 { background: #6c757d; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Keycloak RBAC POC</h1>
+  <p class="sub">Klik op een knop, de backend haalt een JWT op bij Keycloak en roept <code>POST /upload</code> aan.</p>
+
+  <div class="card">
+    <h3>Scenario 1 &mdash; Researcher (toegang verwacht)</h3>
+    <p>Gebruiker: <strong>researcher1</strong> &nbsp;|&nbsp; Rol: <strong>researcher</strong> &nbsp;|&nbsp; Wachtwoord: <code>wachtwoord123</code></p>
+    <button class="btn-green" onclick="run('researcher1','wachtwoord123','r1')">Test als Researcher</button>
+    <div class="result" id="r1"></div>
+  </div>
+
+  <div class="card">
+    <h3>Scenario 2 &mdash; Viewer (toegang geweigerd)</h3>
+    <p>Gebruiker: <strong>viewer1</strong> &nbsp;|&nbsp; Rol: <strong>viewer</strong> &nbsp;|&nbsp; Wachtwoord: <code>wachtwoord123</code></p>
+    <button class="btn-yellow" onclick="run('viewer1','wachtwoord123','v1')">Test als Viewer</button>
+    <div class="result" id="v1"></div>
+  </div>
+
+  <div class="card">
+    <h3>Scenario 3 &mdash; Geen token (niet geauthenticeerd)</h3>
+    <p>Geen gebruiker &mdash; stuurt een verzoek zonder Authorization-header.</p>
+    <button class="btn-red" onclick="run(null,null,'nt')">Test zonder token</button>
+    <div class="result" id="nt"></div>
+  </div>
+
+  <script>
+    async function run(user, pass, id) {
+      const box = document.getElementById(id);
+      box.style.display = 'block';
+      box.className = 'result';
+      box.textContent = 'Bezig...';
+
+      const qs = user ? `?username=${user}&password=${pass}` : '';
+      const resp = await fetch('/demo' + qs);
+      const d = await resp.json();
+
+      const cls = d.status === 201 ? 'ok' : (d.status === 403 ? 'warn' : 'err');
+      const badgeCls = 'b' + d.status;
+
+      box.className = 'result ' + cls;
+      box.innerHTML =
+        `<span class="badge ${badgeCls}">HTTP ${d.status}</span>\n` +
+        (d.token_preview ? `<b>JWT (preview):</b> ${d.token_preview}\n\n` : '') +
+        `<b>Antwoord /upload:</b>\n${JSON.stringify(d.api_response, null, 2)}`;
+    }
+  </script>
+</body>
+</html>

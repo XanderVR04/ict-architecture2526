@@ -34,6 +34,8 @@ services:
     configs:
       - source: flask_app
         target: /app.py
+      - source: flask_html
+        target: /public/index.html
     ports:
       - "5000:5000"
     networks:
@@ -47,6 +49,8 @@ services:
 configs:
   flask_app:
     file: ./app.py
+  flask_html:
+    file: ./public/index.html
   keycloak_realm:
     file: ./keycloak/realm-export.json
 
