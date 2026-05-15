@@ -1,9 +1,5 @@
 ### ADR 3: Zoektechnologie voor de Search Component
 
-**Status:** Geaccepteerd  
-**Datum:** Mei 2026  
-**Auteur:** Iben  
-
 #### Context
 De klant (een onderzoeksafdeling geschiedenis) wil antieke documenten digitaliseren, archiveren en doorzoekbaar maken. Een van de belangrijkste drijvende karakteristieken voor ons systeem is **Searchability & Performance**. 
 Antieke documenten worden vaak via OCR (Optical Character Recognition) ingelezen. Dit levert vaak tekst op met herkenningsfouten. Bovendien bevatten historische documenten verouderde spellingen en variaties op namen. Gebruikers moeten snel door miljoenen pagina's tekst kunnen zoeken. 
