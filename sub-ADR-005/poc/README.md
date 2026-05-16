@@ -55,7 +55,7 @@ Dit start twee services:
 
 | Service        | Poort  | Beschrijving                                                              |
 |----------------|--------|---------------------------------------------------------------------------|
-| `poc_keycloak` | `8080` | Keycloak Identity Provider (admin: `admin` / zie [`.env`](../.env))      |
+| `poc_keycloak` | `8080` | Keycloak Identity Provider (admin: `admin` / zie [`.env.example`](../.env.example))      |
 | `poc_api`      | `5000` | Flask REST API met JWT-validatie en webinterface                          |
 
 Keycloak importeert bij het opstarten automatisch de realm `archief-realm` uit [keycloak/realm-export.json](keycloak/realm-export.json). Dit duurt **60–90 seconden**. De API herstart automatisch via het restart-beleid totdat Keycloak bereikbaar is.

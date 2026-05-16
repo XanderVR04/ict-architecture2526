@@ -16,7 +16,7 @@ De architectuur is vastgelegd in Structurizr DSL. De bronbestanden staan in [c4-
 
 ### Systeemcontextdiagram
 
-![Systeemcontextdiagram](c4-model/systemcontext.png)
+![Systeemcontextdiagram](c4-model/system-context.png)
 
 ### Containerdiagram
 
