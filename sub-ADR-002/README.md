@@ -1,73 +1,41 @@
-# Metadata Management en Object Storage PoC
+# Metadata Management en Object Storage
 
-Dit project dient als Proof of Concept (PoC) voor een schaalbaar archiefsysteem, ontwikkeld voor een onderzoeksafdeling geschiedenis. Het doel is om aan te tonen hoe metadata en fysieke bestanden (blobs) gescheiden kunnen worden opgeslagen om de prestaties en integriteit van het archief te waarborgen binnen een Docker Swarm cluster.
+## Projectbeschrijving
 
----
+Dit project is een Proof of Concept (POC) voor de ICT Architecture projectopdracht. Het toont hoe metadata en fysieke bestanden (blobs) gescheiden kunnen worden opgeslagen voor een schaalbaar en integer archiefsysteem van een onderzoeksafdeling geschiedenis.
 
-## 1. Architectuur & Design Beslissingen
-
-De oplossing is gebaseerd op een gescheiden opslagstrategie waarbij data-integriteit en stabiliteit centraal staan.
+De oplossing is gebaseerd op een gescheiden opslagstrategie:
 
 - **PostgreSQL**: De Metadata Store voor documenteigenschappen, versienummers en SHA-256 integriteit-hashes.
 - **MinIO**: De Object Store voor de daadwerkelijke scans en documenten (blobs).
 - **pgAdmin**: Beheerinterface voor de PostgreSQL database.
 
-### Belangrijke aanpassingen in de PoC-fase
-
-Tijdens de ontwikkeling zijn de volgende keuzes gemaakt om de stabiliteit binnen de Docker Swarm-omgeving te garanderen:
-
-1. **Named Volumes**: In plaats van bind mounts gebruiken we Docker-managed volumes (`minio_volume`, `postgres_volume`). Dit voorkomt permissie-fouten en "Rejected" states bij het deployen op verschillende cluster-nodes.
-2. **Hardcoded Environment Variables**: Om initialisatie-fouten (zoals lege admin-credentials) te voorkomen, zijn de omgevingsvariabelen direct in de `stack.yml` gedefinieerd voor deze PoC.
-
-Voor een gedetailleerde onderbouwing, zie de ADR-sectie onderaan dit document.
+De Proof of Concept staat in [poc/](poc/).
 
 ---
 
-## 2. Gegevensstructuur
+## Architectuuroverzicht
 
-Het systeem gebruikt drie kern-tabellen in PostgreSQL om de data-integriteit en veiligheid te bewaken:
+De architectuur bestaat uit drie containers die samenwerken:
 
-1. **documents**: Bevat de primaire metadata, de originele bestandsnaam en de `role_id` voor toegangscontrole.
-2. **document_versions**: Beheert de koppeling naar de fysieke bestanden in MinIO via een unieke key en bevat de SHA-256 checksum voor integriteitscontrole.
-3. **audit_trail**: Logt elke actie (zoals uploads en wijzigingen) voor volledige traceerbaarheid.
-
----
-
-## 3. Deployment (Docker Swarm)
-
-De omgeving draait op een Docker Swarm cluster. Voor de huidige stabiliteit is de stack gepind op de manager-node (`2526-ICT-arch-nick-reul`).
-
-### De Stack opstarten
-
-Gebruik de volgende commando's in de terminal:
-
-```bash
-# Eventuele oude stack verwijderen
-docker stack rm poc-2
-
-# Navigeer naar de poc/-map en start de stack
-docker stack deploy -c poc.yml poc-2
+```
+Archivaris  -->  Backend API                         uploadt documenten
+Backend API  -->  Integrity Checker                   berekent SHA-256 hash
+Backend API  -->  Object Store (MinIO)                slaat bestanden op (S3 API)
+Backend API  -->  Metadata Store (PostgreSQL)         registreert metadata en checksum
+Backend API  -->  RBAC Manager                       valideert rechten
+Archivaris  -->  pgAdmin / Admin Interface           beheert database direct
 ```
 
-### Toegang tot de Services (Node: 10.164.10.29)
-
-| Service           | URL                      | Credentials                         |
-| ----------------- | ------------------------ | ----------------------------------- |
-| **pgAdmin4**      | http://10.164.10.29:8080 | `admin@test.com` / `password123`    |
-| **MinIO Console** | http://10.164.10.29:9001 | `admin` / `password123`             |
-| **PostgreSQL**    | 10.164.10.29:5432        | `user` / `password123` (DB: `mydb`) |
-
-> **Configuratie tip:** Gebruik in pgAdmin de hostnaam `postgres` (internal Docker DNS) om verbinding te maken met de database.
-
 ---
 
-## 4. C4-Model
+## C4 Diagrammen
 
-De architectuur is vastgelegd in Structurizr DSL. De bronbestanden staan in [c4-model/](c4-model/).
+De onderstaande diagrammen zijn opgesteld volgens het **C4-model** en opgebouwd met **Structurizr DSL**. Het bronbestand staat in [c4-model/](c4-model/).
 
-### DSL broncode
+### C4 Architectuurdiagram
 
-Zie [c4-model/c4.dsl](c4-model/c4.dsl).
+![C4 diagram](c4-model/c4.png)
 
 ```structurizr
 workspace "Digitaal Archief PoC" "Architectuur voor documentopslag en integriteit" {
@@ -166,24 +134,69 @@ workspace "Digitaal Archief PoC" "Architectuur voor documentopslag en integritei
 }
 ```
 
-### Diagram
+---
 
-![C4 diagram](c4-model/c4.png)
+## Technologiestack
+
+| Technologie  | Rol                                                              |
+|--------------|------------------------------------------------------------------|
+| PostgreSQL   | Metadata Store voor documenteigenschappen, versies en checksums  |
+| MinIO        | Object Store voor fysieke bestanden (PDF/Images)                 |
+| pgAdmin      | Beheerinterface voor de PostgreSQL database                      |
+| Docker Swarm | Orkestratie van containers via een stack                         |
 
 ---
 
-## 5. Technische Specificaties
+## Mappenstructuur
 
-- **Orchestration**: Docker Swarm
-- **Images**: `postgres:15-alpine`, `minio/minio:latest`, `dpage/pgadmin4:latest`
-- **Storage**: Named Volumes met de `local` driver.
-- **Netwerk**: Overlay netwerk (`adr2_default`).
+```
+sub-ADR-002/
+├── README.md                              # Dit bestand (overzicht en ADR documentatie)
+├── c4-model/
+│   ├── c4.dsl                             # C4 model in Structurizr DSL
+│   └── c4.png                             # Visueel C4 architectuurdiagram
+└── poc/
+    ├── poc.yml                            # Docker Swarm stack definitie
+    ├── example.env                        # Voorbeeld omgevingsvariabelen
+    ├── .env                               # Omgevingsvariabelen (niet in versiecontrole)
+    ├── init/
+    │   └── 01_init_storage.sql            # SQL initialisatiescript voor de database
+    ├── geuploade_bestanden/               # Voorbeelddocumenten voor de POC
+    └── README.md                          # Opstartinstructies voor de POC
+```
 
+---
 
+## POC
 
+Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/README.md).
 
+---
 
-# ADR 1: Architectuur voor Documentopslag en Integriteit in PoC
+## Documentatie
+
+| Document | Beschrijving |
+|---|---|
+| [ADR-002](README.md) | Architectuurbeslissing: Gescheiden Opslagstrategie (PostgreSQL + MinIO) |
+| [C4 Architectuurdiagram (DSL)](c4-model/c4.dsl) | C4 model in Structurizr DSL (systeemcontext, container, component en deployment) |
+| [C4 Architectuurdiagram (PNG)](c4-model/c4.png) | Visuele weergave van de volledige architectuur |
+
+### Kernbeslissing
+
+**[ADR-002](README.md)** beschrijft de keuze voor een gescheiden opslagstrategie waarbij metadata in PostgreSQL en binaire bestanden in MinIO worden opgeslagen. De voornaamste redenen zijn:
+
+- **Data-integriteit:** elke documentversie krijgt een verplichte SHA-256 checksum voor bewijsbare integriteit van archiefstukken.
+- **Schaalbaarheid:** MinIO schaalt horizontaal voor grote bestanden; PostgreSQL blijft performant door de scheiding van binaire data.
+- **Security:** `role_id` op documentniveau legt het fundament voor RBAC direct bij de bron.
+
+---
+
+# ADR-002: Architectuur voor Documentopslag en Integriteit
+
+> Dit ADR volgt het **Michael Nygard-formaat** (het originele ADR-formaat uit 2011).
+> Referentie: <https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions>
+
+---
 
 ## Context
 
@@ -196,6 +209,8 @@ De volgende uitdagingen zijn geïdentificeerd:
 3. Security: Hoe beperken we toegang tot specifieke documenten?
 4. Container Orchestration: Hoe zorgen we voor hoge beschikbaarheid en schaalbaarheid?
 
+---
+
 ## Besluit
 
 We hebben besloten om de volgende architecturale beslissingen te hanteren:
@@ -205,53 +220,7 @@ We hebben besloten om de volgende architecturale beslissingen te hanteren:
 3.  **Toegangscontrole**: Een `role_id` wordt op documentniveau toegevoegd aan de metadata-tabel om RBAC in de toekomst af te dwingen.
 4.  **Container Orchestration**: Deployment via **Docker Swarm** voor hoge beschikbaarheid en replicatie.
 
-## Onderbouwing
-
-### Waarom Object Storage (MinIO) boven Database (BLOB)?
-
-- **Schaalbaarheid**: MinIO kan eenvoudiger horizontaal schalen dan een SQL-database.
-- **Performance**: De database blijft "lean". Queries op metadata zijn razendsnel omdat ze niet gehinderd worden door zware binaire data.
-- **S3-compatibiliteit**: Standardiseert de API voor toekomstige integraties.
-
-### Waarom SHA-256 Checksums?
-
-- Voor een archief is "onweerlegbaarheid" cruciaal. Door een hash op te slaan bij de metadata, kan het systeem op elk moment verifiëren of de blob in MinIO nog integer is door een nieuwe hash-berekening te vergelijken met de opgeslagen waarde.
-- SHA-256 biedt voldoende collision resistance voor archiefdoeleinden.
-
-### Waarom Metadata-driven RBAC?
-
-- Door de `role_id` direct in de `documents`-tabel op te nemen, leggen we het fundament voor beveiliging bij de bron. Dit voorkomt dat ongeautoriseerde gebruikers via de API/applicatie zelfs maar het bestaan of de locatie van een bestand kunnen opvragen.
-
-### Waarom Docker Swarm?
-
-- **Hoge Beschikbaarheid**: Services worden gerepliceerd over meerdere nodes.
-- **Load Balancing**: Ingebouwde load balancing tussen replicas.
-- **Rolling Updates**: Veilige updates zonder downtime.
-- **Secret Management**: Externe secrets worden beheerd door Docker Swarm zelf.
-
-## Implementatie Details
-
-### Swarm Cluster Configuratie
-
-- **Nodes**: 3 worker nodes (2526-ICT-arch-nick-reul, 2526-ICT-arch-aron-bauwens, 2526-ICT-arch-xander-vanraemdonck)
-- **Manager**: 2526-ICT-arch-nick-reul
-- **Network**: Overlay network `adr2_default` met driver `overlay`
-
-### Services
-
-| Service  | Image              | Replicas |
-| -------- | ------------------ | -------- |
-| minio    | minio/minio        | 1        |
-| postgres | postgres:15-alpine | 1        |
-| pgadmin  | dpage/pgadmin4     | 1        |
-
-### Volumes
-
-Gebruik van named volumes met `driver: local` voor persistente opslag:
-
-- `adr2_minio_volume`: Object storage data
-- `adr2_postgres_volume`: Database data
-- `adr2_pgadmin_volume`: pgadmin data
+---
 
 ## Gevolgen
 

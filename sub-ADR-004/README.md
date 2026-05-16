@@ -176,9 +176,15 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 
 ## Documentatie
 
-| Document                      | Beschrijving                                                    |
-|-------------------------------|-----------------------------------------------------------------|
-| [ADR-004](README.md)          | Architectuurbeslissing: Event Sourcing met PostgreSQL (MADR)   |
+| Document | Beschrijving |
+|---|---|
+| [ADR-004](README.md) | Architectuurbeslissing: Event Sourcing met PostgreSQL (MADR) |
+| [Systeemcontextdiagram (DSL)](c4-model/system-context.dsl) | C4 systeemcontextdiagram in Structurizr DSL |
+| [Systeemcontextdiagram (PNG)](c4-model/system-context.png) | Visuele weergave van de systeemcontext |
+| [Containerdiagram (DSL)](c4-model/container.dsl) | C4 containerdiagram in Structurizr DSL |
+| [Containerdiagram (PNG)](c4-model/container.png) | Visuele weergave van de containerarchitectuur |
+| [Deploymentdiagram (DSL)](c4-model/deployment.dsl) | C4 deploymentdiagram in Structurizr DSL |
+| [Deploymentdiagram (PNG)](c4-model/deployment.png) | Visuele weergave van de deploymentarchitectuur |
 
 ### Kernbeslissing
 

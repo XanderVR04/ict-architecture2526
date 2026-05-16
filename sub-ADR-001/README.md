@@ -1,123 +1,33 @@
-# ADR-001: Gebruik van een Message Queue voor ontkoppeling van upload en verwerking
+# Gebruik van een Message Queue voor ontkoppeling van upload en verwerking
 
-**Status:** Accepted  
-**Datum:** 04/05/2026
+## Projectbeschrijving
 
----
+Dit project is een Proof of Concept (POC) voor de ICT Architecture projectopdracht. Het toont hoe uploads van historische documenten asynchroon ontkoppeld worden van de OCR-verwerking via een Message Queue.
 
-## Context
+Grote hoeveelheden historische documenten worden geüpload en verwerkt via OCR. Deze verwerking is computationeel intensief en kan aanzienlijk meer tijd in beslag nemen dan het uploaden zelf. Door gebruik te maken van een Message Queue (RabbitMQ) kunnen uploads en verwerking onafhankelijk van elkaar schalen, waardoor gebruikers niet hoeven te wachten op het resultaat.
 
-De applicatie moet grote hoeveelheden historische documenten verwerken.  
-Een belangrijk onderdeel van de workflow is het uitvoeren van OCR op geüploade documenten. Deze verwerking is computationeel intensief en kan aanzienlijk meer tijd in beslag nemen dan het uploaden zelf.
-
-Een van de belangrijkste architecturale karakteristieken is:
-
-- **Scalability**: het systeem moet grote hoeveelheden documenten kunnen verwerken en flexibel kunnen schalen afhankelijk van de belasting.
-
-Zonder extra maatregelen zou een synchrone verwerking (waarbij OCR direct na upload gebeurt) leiden tot:
-
-- Lange wachttijden voor gebruikers  
-- Slechte gebruikerservaring  
-- Beperkte schaalbaarheid
+De Proof of Concept staat in [poc/](poc/).
 
 ---
 
-## Decision
+## Architectuuroverzicht
 
-We kiezen ervoor om een **Message Queue** te gebruiken om uploads los te koppelen van de OCR-verwerking.
+De architectuur bestaat uit vijf containers die samenwerken:
 
-Concreet wordt **RabbitMQ** gebruikt als message broker om berichten (taken) in een wachtrij te plaatsen, die vervolgens asynchroon verwerkt worden door aparte processing componenten.
-
----
-
-## Considered options
-
-### 1. Synchrone verwerking
-
-Uploads worden onmiddellijk verwerkt door de OCR-component.
-
-**Voordelen:**
-- Eenvoudige implementatie  
-- Geen extra infrastructuur nodig  
-
-**Nadelen:**
-- Slechte schaalbaarheid  
-- Lange responstijden  
-- Sterke koppeling tussen upload en verwerking  
+```
+Researcher / Archivist  -->  Web Application             uploadt documenten
+Web Application         -->  Backend API                 vraagt status, stuurt upload door
+Backend API             -->  Message Queue (RabbitMQ)    plaatst verwerkingstaak in queue
+Backend API             -->  Database                    slaat metadata en job status op
+Message Queue           -->  Processing Service          levert taken aan workers
+Processing Service      -->  Database                    slaat resultaten op
+```
 
 ---
 
-### 2. Asynchrone verwerking zonder message queue
+## C4 Diagrammen
 
-Bijvoorbeeld via directe service-aanroepen of polling.
-
-**Voordelen:**
-- Minder infrastructuur dan een volwaardige message queue  
-- Enige vorm van ontkoppeling mogelijk  
-
-**Nadelen:**
-- Minder robuust bij piekbelasting  
-- Moeilijker beheer van retries en foutafhandeling  
-- Beperkte buffering van taken  
-
----
-
-### 3. Asynchrone verwerking met message queue (gekozen)
-
-Gebruik van een message broker om taken in wachtrijen te plaatsen.
-
-**Voordelen:**
-- Sterke ontkoppeling tussen componenten  
-- Betere schaalbaarheid door buffering van taken  
-- Ondersteuning voor retries en foutafhandeling  
-- Mogelijkheid tot parallelle verwerking  
-
-**Nadelen:**
-- Extra operationele complexiteit  
-- Nood aan beheer van de message broker  
-
----
-
-## Rationale
-
-De keuze voor een message queue wordt voornamelijk gedreven door de vereiste **scalability**.
-
-- OCR-verwerking is resource-intensief en moet onafhankelijk kunnen schalen van het uploadproces  
-- Door taken in een wachtrij te plaatsen, kunnen meerdere processing workers parallel werken  
-- Het systeem kan piekbelasting opvangen door taken tijdelijk te bufferen  
-
-Daarnaast draagt deze aanpak bij aan:
-
-- **Loose coupling** tussen ingestion en processing componenten  
-- Betere fouttolerantie via retries en queue-mechanismen  
-- Flexibiliteit om later andere verwerkingsstappen toe te voegen  
-
----
-
-## Consequences
-
-**Positief:**
-- Verbeterde schaalbaarheid van verwerking  
-- Betere gebruikerservaring (snelle uploads, verwerking op de achtergrond)  
-- Mogelijkheid tot horizontale schaalvergroting van processing componenten  
-
-**Negatief:**
-- Complexere architectuur  
-- Nood aan monitoring van queues en workers  
-- Eventuele vertraging tussen upload en beschikbaarheid van resultaten  
-
----
-
-## Notes
-
-De keuze voor RabbitMQ is een implementatiedetail dat deze architecturale beslissing ondersteunt.  
-De kern van de beslissing is het gebruik van een message queue als patroon, onafhankelijk van de specifieke technologie.
-
----
-
-## C4-Model
-
-De architectuur is vastgelegd in Structurizr DSL. De bronbestanden staan in [c4-model/](c4-model/).
+De onderstaande diagrammen zijn opgesteld volgens het **C4-model** en opgebouwd met **Structurizr DSL**. De afzonderlijke bronbestanden staan in [c4-model/](c4-model/).
 
 ### Systeemcontextdiagram
 
@@ -280,6 +190,123 @@ workspace {
 
 ---
 
+## Technologiestack
+
+| Technologie          | Rol                                                           |
+|----------------------|---------------------------------------------------------------|
+| Web App              | Frontend voor gebruikers                                      |
+| REST API             | Verwerkt requests en beheert jobs                             |
+| RabbitMQ             | Message broker voor asynchrone verwerking                     |
+| Worker service       | Voert OCR en documentverwerking uit                           |
+| PostgreSQL / MongoDB | Opslag van documenten, metadata en job status                 |
+| Docker Swarm         | Orkestratie van containers via een stack                      |
+
+---
+
+## Mappenstructuur
+
+```
+sub-ADR-001/
+├── README.md                              # Dit bestand (overzicht en ADR documentatie)
+├── c4-model/
+│   ├── system-context.dsl                 # C4 systeemcontextdiagram (Structurizr DSL)
+│   ├── system-context.png                 # Visueel systeemcontextdiagram
+│   ├── container.dsl                      # C4 containerdiagram (Structurizr DSL)
+│   ├── container.png                      # Visueel containerdiagram
+│   ├── deployment.dsl                     # C4 deploymentdiagram (Structurizr DSL)
+│   └── deployment.png                     # Visueel deploymentdiagram
+└── poc/
+    ├── poc.yaml                           # Docker Swarm stack definitie
+    ├── configs/
+    │   ├── rabbitmq.conf                  # RabbitMQ configuratie
+    │   └── rabbitmq_host.txt              # Hostnaam voor RabbitMQ verbinding
+    ├── processor/
+    │   ├── Dockerfile                     # Container definitie voor de processor
+    │   ├── processor.py                   # OCR verwerkingslogica
+    │   └── requirements.txt               # Python dependencies
+    ├── secrets/
+    │   ├── rabbitmq_pass.txt              # RabbitMQ wachtwoord (Docker Secret)
+    │   └── rabbitmq_user.txt              # RabbitMQ gebruikersnaam (Docker Secret)
+    ├── uploader/
+    │   ├── Dockerfile                     # Container definitie voor de uploader
+    │   ├── uploader.py                    # Upload logica
+    │   └── requirements.txt               # Python dependencies
+    └── README.md                          # Opstartinstructies voor de POC
+```
+
+---
+
 ## POC
 
 Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/README.md).
+
+---
+
+## Documentatie
+
+| Document | Beschrijving |
+|---|---|
+| [ADR-001](README.md) | Architectuurbeslissing: Message Queue voor asynchrone verwerking |
+| [Systeemcontextdiagram (DSL)](c4-model/system-context.dsl) | C4 systeemcontextdiagram in Structurizr DSL |
+| [Systeemcontextdiagram (PNG)](c4-model/system-context.png) | Visuele weergave van de systeemcontext |
+| [Containerdiagram (DSL)](c4-model/container.dsl) | C4 containerdiagram in Structurizr DSL |
+| [Containerdiagram (PNG)](c4-model/container.png) | Visuele weergave van de containerarchitectuur |
+| [Deploymentdiagram (DSL)](c4-model/deployment.dsl) | C4 deploymentdiagram in Structurizr DSL |
+| [Deploymentdiagram (PNG)](c4-model/deployment.png) | Visuele weergave van de deploymentarchitectuur |
+
+### Kernbeslissing
+
+**[ADR-001](README.md)** beschrijft de keuze voor een Message Queue (RabbitMQ) als patroon voor het ontkoppelen van uploads en OCR-verwerking. De voornaamste redenen zijn:
+
+- **Scalability:** OCR-verwerking is resource-intensief en moet onafhankelijk kunnen schalen van het uploadproces.
+- **Loose coupling:** door taken in een wachtrij te plaatsen, zijn de ingestion- en processing-componenten volledig ontkoppeld.
+- **Fouttolerantie:** ingebouwde retry- en queue-mechanismen zorgen voor robuuste verwerking bij piekbelasting.
+
+---
+
+# ADR-001: Gebruik van een Message Queue voor ontkoppeling van upload en verwerking
+
+> Dit ADR volgt het **Michael Nygard-formaat** (het originele ADR-formaat uit 2011).
+> Referentie: <https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions>
+
+**Status:** Accepted  
+**Datum:** 04/05/2026
+
+---
+
+## Context
+
+De applicatie moet grote hoeveelheden historische documenten verwerken.  
+Een belangrijk onderdeel van de workflow is het uitvoeren van OCR op geüploade documenten. Deze verwerking is computationeel intensief en kan aanzienlijk meer tijd in beslag nemen dan het uploaden zelf.
+
+Een van de belangrijkste architecturale karakteristieken is:
+
+- **Scalability**: het systeem moet grote hoeveelheden documenten kunnen verwerken en flexibel kunnen schalen afhankelijk van de belasting.
+
+Zonder extra maatregelen zou een synchrone verwerking (waarbij OCR direct na upload gebeurt) leiden tot:
+
+- Lange wachttijden voor gebruikers  
+- Slechte gebruikerservaring  
+- Beperkte schaalbaarheid
+
+---
+
+## Decision
+
+We kiezen ervoor om een **Message Queue** te gebruiken om uploads los te koppelen van de OCR-verwerking.
+
+Concreet wordt **RabbitMQ** gebruikt als message broker om berichten (taken) in een wachtrij te plaatsen, die vervolgens asynchroon verwerkt worden door aparte processing componenten.
+
+---
+
+## Consequences
+
+**Positief:**
+- Verbeterde schaalbaarheid van verwerking  
+- Betere gebruikerservaring (snelle uploads, verwerking op de achtergrond)  
+- Mogelijkheid tot horizontale schaalvergroting van processing componenten  
+
+**Negatief:**
+- Complexere architectuur  
+- Nood aan monitoring van queues en workers  
+- Eventuele vertraging tussen upload en beschikbaarheid van resultaten  
