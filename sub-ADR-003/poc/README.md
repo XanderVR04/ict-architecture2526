@@ -5,4 +5,4 @@ Deze Proof of Concept bewijst dat Elasticsearch in staat is om documenten te vin
 1. Navigeer naar deze map in de terminal.
 2. Voer het volgende commando uit om de stack te starten:
    ```bash
-   docker stack deploy -c poc.yaml poc
+   docker stack deploy -c poc.yaml poc-3

@@ -15,7 +15,7 @@ Hierdoor is het onmogelijk om per ongeluk data te verliezen of te overschrijven:
 
 2. **Start de stack** via Docker Swarm:
    ```bash
-   docker stack deploy -f poc.yaml poc_data
+   docker stack deploy -f poc.yaml poc-4
    ```
 
 3. **Bezoek de Web Applicatie:**

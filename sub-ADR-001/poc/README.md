@@ -18,7 +18,7 @@ Tip: zet in [sub-ADR-001/poc/configs/rabbitmq_host.txt](sub-ADR-001/poc/configs/
 
 Voer dan deze uit (telkens opnieuw wanneer je de POC start):
 
-1) docker stack deploy -c poc.yaml poc
+1) docker stack deploy -c poc.yaml poc-1
 2) docker service ls
 3) docker service ps poc_rabbitmq --no-trunc
 4) docker service ps poc_uploader --no-trunc
