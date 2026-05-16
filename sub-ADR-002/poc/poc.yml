@@ -19,7 +19,7 @@ services:
       endpoint_mode: vip
       placement:
         constraints:
-          - node.hostname == 2526-ICT-arch-nick-reul
+          - node.hostname == docker-desktop 
 
   postgres:
     image: postgres:15-alpine
@@ -32,12 +32,15 @@ services:
         source: /data/postgres
         target: /var/lib/postgresql/data
       - type: bind
-        source: ./init
+        source: /data/init
         target: /docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     deploy:
       replicas: 1
+      placement:
+        constraints:
+          - node.hostname == docker-desktop
 
   pgadmin:
     image: dpage/pgadmin4
@@ -54,4 +57,4 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == 2526-ICT-arch-nick-reul
+          - node.hostname == docker-desktop 
