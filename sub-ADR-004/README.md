@@ -1,4 +1,4 @@
-# Document Archief Systeem - Data-integriteit en Versioning
+# Document Archief Systeem: Dataintegriteit en Versioning
 
 ## Projectbeschrijving
 
@@ -188,15 +188,15 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 
 ### Kernbeslissing
 
-**[ADR-004](README.md)** beschrijft de keuze voor het Event Sourcing patroon om data-integriteit te waarborgen. De voornaamste redenen zijn:
+**[ADR-004](README.md)** beschrijft de keuze voor het Event Sourcing patroon om dataintegriteit te waarborgen. De voornaamste redenen zijn:
 
-- **Data-integriteit:** Elke wijziging wordt als immutable event opgeslagen; destructieve operaties zijn onmogelijk.
+- **Dataintegriteit:** Elke wijziging wordt als immutable event opgeslagen; destructieve operaties zijn onmogelijk.
 - **Auditability:** Volledige historie van elk document (van upload tot correcties) is te herleiden.
 - **Versioning:** Out-of-the-box versiegeschiedenis van metadata en annotaties.
 
 ---
 
-# ADR-004: Aanpak voor Data-integriteit en Versioning
+# ADR-004: Aanpak voor Dataintegriteit en Versioning
 
 > Dit ADR volgt het **MADR-formaat** (Markdown Architectural Decision Records, v3.0.0).
 > Referentie: <https://adr.github.io/madr/>
@@ -210,9 +210,9 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 
 Historische documenten zijn onvervangbaar en kritisch. Binnen het systeem moet te allen tijde worden vermeden dat data per ongeluk overschreven of verwijderd wordt ("geen dataverlies"). Tegelijk vereisen onderzoekers en archivarissen een volledige audit trail (wie heeft wat wanneer aangepast) en de mogelijkheid tot versioning van zowel metadata als annotaties.
 
-In **ADR-002** (Gescheiden Opslagstrategie) is reeds de keuze gemaakt om een relationele database (PostgreSQL) in te zetten voor de verwerking van metadata. Om de data-integriteit binnen deze component te waarborgen zonder de complexiteit van de technologie-stack onnodig te vergroten, is een strategie nodig voor de manier waarop data wordt opgeslagen.
+In **ADR-002** (Gescheiden Opslagstrategie) is reeds de keuze gemaakt om een relationele database (PostgreSQL) in te zetten voor de verwerking van metadata. Om de dataintegriteit binnen deze component te waarborgen zonder de complexiteit van de technologiestack onnodig te vergroten, is een strategie nodig voor de manier waarop data wordt opgeslagen.
 
-**Beslissingsvraag:** Hoe waarborgen we data-integriteit en versioning binnen PostgreSQL zonder onnodige complexiteit?
+**Beslissingsvraag:** Hoe waarborgen we dataintegriteit en versioning binnen PostgreSQL zonder onnodige complexiteit?
 
 ---
 
@@ -228,7 +228,7 @@ In **ADR-002** (Gescheiden Opslagstrategie) is reeds de keuze gemaakt om een rel
 
 **Gekozen optie: Event Sourcing met PostgreSQL (Append-Only)**
 
-We kiezen ervoor om het **Event Sourcing (Append-Only Log) patroon** toe te passen binnen PostgreSQL voor het beheer van de metadata en document-wijzigingen.
+We kiezen ervoor om het **Event Sourcing (Append-Only Log) patroon** toe te passen binnen PostgreSQL voor het beheer van de metadata en documentwijzigingen.
 
 In plaats van tabellen destructief aan te passen (`UPDATE` of `DELETE`), wordt elke wijziging in de levenscyclus van een document (bijv. `DocumentCreated`, `MetadataUpdated`, `AnnotationAdded`) opgeslagen als een onveranderlijk (immutable) nieuw "event" in een append-only tabel.
 
@@ -242,7 +242,7 @@ In plaats van tabellen destructief aan te passen (`UPDATE` of `DELETE`), wordt e
 ### Negatieve gevolgen
 
 - Complexiteit bij het bevragen van data (Projection Engine nodig)
-- Noodzaak voor een gesynchroniseerd Read-model (CQRS)
+- Noodzaak voor een gesynchroniseerd Read model (CQRS)
 - 'Eventual consistency' in de UI kan optreden
 
 ---
@@ -260,7 +260,7 @@ In plaats van tabellen destructief aan te passen (`UPDATE` of `DELETE`), wordt e
 
 | | |
 |---|---|
-| **Voordeel** | 100% data-integriteit; events zijn immutable; out-of-the-box audit log en perfecte versioning; gebruikt bestaande PostgreSQL technologie |
+| **Voordeel** | 100% dataintegriteit; events zijn immutable; out-of-the-box audit log en perfecte versioning; gebruikt bestaande PostgreSQL technologie |
 | **Nadeel** | Bevragen van huidige staat vereist complexere code (Projection Engine) |
 
 ### Optie 3: Dedicated Event Store
@@ -276,7 +276,7 @@ In plaats van tabellen destructief aan te passen (`UPDATE` of `DELETE`), wordt e
 
 De keuze voor Event Sourcing ondersteunt de kernkwaliteiten van het systeem:
 
-- **Data-integriteit:** De onvervangbaarheid van historische documenten weegt het zwaarst. Het Event Sourcing patroon geeft de garantie dat elke tussenstap van een document (van eerste upload, door de OCR, tot de correcties van de archivaris) exact kan worden herleid.
+- **Dataintegriteit:** De onvervangbaarheid van historische documenten weegt het zwaarst. Het Event Sourcing patroon geeft de garantie dat elke tussenstap van een document (van eerste upload, door de OCR, tot de correcties van de archivaris) exact kan worden herleid.
 - **Auditability:** Events zijn immutable en vormen de single source of truth.
 - **Extensibility:** Omdat we reeds gekozen hebben voor PostgreSQL, kunnen we gebruik maken van krachtige `JSONB` ondersteuning om variërende payloads van events flexibel op te slaan.
 
@@ -285,5 +285,5 @@ De keuze voor Event Sourcing ondersteunt de kernkwaliteiten van het systeem:
 ## Gevolgen
 
 - **Architecturaal:** PostgreSQL fungeert als Event Store (append-only tabel) en bevat tegelijk het Read Model (huidige document status).
-- **Ontwikkeling:** Elke wijziging wordt als INSERT naar de events-tabel geschreven; een Projection Engine berekent de huidige staat.
-- **Infrastructuur:** Geen nieuwe technologie nodig; volledig gebaseerd op bestaande PostgreSQL-instantie uit ADR-002.
+- **Ontwikkeling:** Elke wijziging wordt als INSERT naar de eventstabel geschreven; een Projection Engine berekent de huidige staat.
+- **Infrastructuur:** Geen nieuwe technologie nodig; volledig gebaseerd op bestaande PostgreSQL instantie uit ADR-002.

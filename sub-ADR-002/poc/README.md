@@ -23,7 +23,7 @@ docker stack deploy -c poc.yml poc-2
 De fysieke bestanden (blobs) worden opgeslagen in MinIO. Dit ontlast de database en zorgt voor een schaalbaar systeem.
 
 1. Navigeer naar de MinIO Console via: **http://10.164.10.29:9001**
-2. Log in met de credentials: `admin` / `password123`.
+2. Log in met de credentials: `admin` / zie `env.example`.
 3. Maak een nieuwe bucket aan met de naam: `archief-scans`.
 4. Upload de test-PDF-bestanden naar deze bucket:
    - `001 - Inleiding Docker Swarm.pdf`
@@ -36,13 +36,13 @@ De fysieke bestanden (blobs) worden opgeslagen in MinIO. Dit ontlast de database
 
 ## 3. Database Initialisatie en Data Import (pgAdmin)
 
-Navigeer naar pgAdmin via: **http://10.164.10.29:8080** (Login: `admin@test.com` / `password123`).
+Navigeer naar pgAdmin via: **http://10.164.10.29:8080** (Login: `admin@test.com` / zie `env.example`).
 
 **Verbinding maken:**
 
 - Voeg een nieuwe server toe.
 - Hostnaam: `postgres` (gebruik de servicenaam, niet het IP, voor interne communicatie binnen het Docker netwerk).
-- Gebruiker: `user` / Wachtwoord: `password123`.
+- Gebruiker: `user` / Wachtwoord: zie `env.example`.
 
 Voer in de Query Tool het volgende SQL-script uit om de metadata te koppelen aan de bestanden in MinIO:
 
@@ -89,7 +89,7 @@ FROM documents d
 JOIN document_versions v ON d.id = v.document_id;
 ```
 
-**Controleren van het audit-logboek:**
+**Controleren van het auditlogboek:**
 
 ```sql
 SELECT action, document_id, timestamp, user_id

@@ -1,6 +1,6 @@
-# Proof of Concept: Data-integriteit & Versioning (Sub-ADR 4)
+# Proof of Concept: Dataintegriteit & Versioning (Sub-ADR 4)
 
-Deze directory bevat de Proof of Concept (POC) voor Sub-ADR 4: **Aanpak voor Data-integriteit en Versioning**. 
+Deze directory bevat de Proof of Concept (POC) voor Sub-ADR 4: **Aanpak voor Dataintegriteit en Versioning**. 
 
 In deze POC demonstreren we het **Event Sourcing** patroon. We gebruiken PostgreSQL als een "Append-Only Event Store" in combinatie met een simpele web interface (via Express.js). 
 
@@ -10,7 +10,7 @@ Hierdoor is het onmogelijk om per ongeluk data te verliezen of te overschrijven:
 
 1. **Ga naar deze directory** in je terminal:
    ```bash
-   cd poc_data_integrity
+   cd poc
    ```
 
 2. **Start de stack** via Docker Swarm:

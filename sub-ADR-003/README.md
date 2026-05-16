@@ -207,7 +207,7 @@ Een traditionele relationele database met SQL `LIKE '%zoekterm%'` queries schiet
 ## Beslissing
 
 We kiezen voor **Elasticsearch** (een gedistribueerde, RESTful zoek- en analytics engine gebaseerd op Apache Lucene) als de dedicated zoekindex voor onze Search Component.  
-De gedigitaliseerde teksten en metadata van de archiefstukken zullen vanuit de hoofd-database asynchroon (bijv. via een event bus of log-shipping) naar Elasticsearch worden gesynchroniseerd.
+De gedigitaliseerde teksten en metadata van de archiefstukken zullen vanuit de hoofddatabase asynchroon (bijv. via een event bus of log-shipping) naar Elasticsearch worden gesynchroniseerd.
 
 ---
 

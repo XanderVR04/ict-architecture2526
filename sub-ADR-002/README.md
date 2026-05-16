@@ -6,7 +6,7 @@ Dit project is een Proof of Concept (POC) voor de ICT Architecture projectopdrac
 
 De oplossing is gebaseerd op een gescheiden opslagstrategie:
 
-- **PostgreSQL**: De Metadata Store voor documenteigenschappen, versienummers en SHA-256 integriteit-hashes.
+- **PostgreSQL**: De Metadata Store voor documenteigenschappen, versienummers en SHA-256 integriteitshashes.
 - **MinIO**: De Object Store voor de daadwerkelijke scans en documenten (blobs).
 - **pgAdmin**: Beheerinterface voor de PostgreSQL database.
 
@@ -185,7 +185,7 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 
 **[ADR-002](README.md)** beschrijft de keuze voor een gescheiden opslagstrategie waarbij metadata in PostgreSQL en binaire bestanden in MinIO worden opgeslagen. De voornaamste redenen zijn:
 
-- **Data-integriteit:** elke documentversie krijgt een verplichte SHA-256 checksum voor bewijsbare integriteit van archiefstukken.
+- **Dataintegriteit:** elke documentversie krijgt een verplichte SHA-256 checksum voor bewijsbare integriteit van archiefstukken.
 - **Schaalbaarheid:** MinIO schaalt horizontaal voor grote bestanden; PostgreSQL blijft performant door de scheiding van binaire data.
 - **Security:** `role_id` op documentniveau legt het fundament voor RBAC direct bij de bron.
 
@@ -200,11 +200,11 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 
 ## Context
 
-Voor het digitale archiefsysteem (PoC) moet een schaalbare methode worden gevonden om binaire bestanden (scans) en bijbehorende metadata op te slaan. Er zijn eisen gesteld aan data-integriteit (bewijs dat bestanden ongewijzigd zijn) en role-based access control (RBAC).
+Voor het digitale archiefsysteem (PoC) moet een schaalbare methode worden gevonden om binaire bestanden (scans) en bijbehorende metadata op te slaan. Er zijn eisen gesteld aan dataintegriteit (bewijs dat bestanden ongewijzigd zijn) en role-based access control (RBAC).
 
 De volgende uitdagingen zijn geïdentificeerd:
 
-1. Database-bloat: Het opslaan van grote PDF's in PostgreSQL maakt back-ups en queries traag.
+1. Databasebloat: Het opslaan van grote PDF's in PostgreSQL maakt backups en queries traag.
 2. Integriteit: Hoe garanderen we dat een bestand na 10 jaar nog exact hetzelfde is?
 3. Security: Hoe beperken we toegang tot specifieke documenten?
 4. Container Orchestration: Hoe zorgen we voor hoge beschikbaarheid en schaalbaarheid?
@@ -229,11 +229,11 @@ We hebben besloten om de volgende architecturale beslissingen te hanteren:
 - Betere performance en schaalbaarheid.
 - Bewijsbare integriteit van archiefstukken (essentieel voor juridische validiteit).
 - Hoge beschikbaarheid via Swarm replicatie.
-- Duidelijk fundament voor verdere ontwikkeling van een front-end/back-end.
+- Duidelijk fundament voor verdere ontwikkeling van een frontend/backend.
 - Veilige credentials management via secrets.
 
 ### Negatief/Aandachtspunten
 
-- **Consistentie-risico**: Er bestaat een theoretische kans dat een record in de DB wordt aangemaakt maar de upload naar MinIO faalt (of andersom). In de productiefase moet dit worden afgevangen met transactie-management of een cleanup-service.
-- **Complexiteit**: Er moeten twee systemen (DB en MinIO) worden geback-upt in plaats van één.
+- **Consistentierisico**: Er bestaat een theoretische kans dat een record in de DB wordt aangemaakt maar de upload naar MinIO faalt (of andersom). In de productiefase moet dit worden afgevangen met transactiemanagement of een cleanupservice.
+- **Complexiteit**: Er moeten twee systemen (DB en MinIO) worden gebackupt in plaats van één.
 - **Node Failure**: Bij uitval van de PostgreSQL node kunnen writes tijdelijk niet beschikbaar zijn (single replica).

@@ -259,8 +259,8 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 **[ADR-001](README.md)** beschrijft de keuze voor een Message Queue (RabbitMQ) als patroon voor het ontkoppelen van uploads en OCR-verwerking. De voornaamste redenen zijn:
 
 - **Scalability:** OCR-verwerking is resource-intensief en moet onafhankelijk kunnen schalen van het uploadproces.
-- **Loose coupling:** door taken in een wachtrij te plaatsen, zijn de ingestion- en processing-componenten volledig ontkoppeld.
-- **Fouttolerantie:** ingebouwde retry- en queue-mechanismen zorgen voor robuuste verwerking bij piekbelasting.
+- **Loose coupling:** door taken in een wachtrij te plaatsen, zijn de ingestion en processingcomponenten volledig ontkoppeld.
+- **Fouttolerantie:** ingebouwde retry en queuemechanismen zorgen voor robuuste verwerking bij piekbelasting.
 
 ---
 

@@ -262,7 +262,7 @@ De onderzoeksafdeling geschiedenis vereist een systeem voor de digitalisering va
 - **Onderzoekers / Archivarissen** moeten documenten kunnen uploaden, bewerken en OCR-processen aansturen.
 - **Het Publiek** mag enkel gevalideerde en vrijgegeven documenten inzien.
 
-De architectuur bestaat uit meerdere services (Document Service, OCR Service, …). Zonder centraal beheer zou elke service afzonderlijk gebruikers moeten valideren, wat leidt tot versnipperde security-logica, een verhoogde kans op kwetsbaarheden en een gebrek aan audit trails.
+De architectuur bestaat uit meerdere services (Document Service, OCR Service, …). Zonder centraal beheer zou elke service afzonderlijk gebruikers moeten valideren, wat leidt tot versnipperde securitylogica, een verhoogde kans op kwetsbaarheden en een gebrek aan audit trails.
 
 **Beslissingsvraag:** Hoe beheren we authenticatie en autorisatie centraal over alle services heen?
 
@@ -286,13 +286,13 @@ Keycloak biedt de beste balans tussen security, controle over gevoelige data en 
 
 - Out-of-the-box ondersteuning voor RBAC, SSO en LDAP/AD-integratie
 - Stateless authenticatie via JWT, services hoeven geen sessie-informatie op te slaan
-- Bewezen protocollen (OAuth2, OIDC, RS256) minimaliseren security-risico's
+- Bewezen protocollen (OAuth2, OIDC, RS256) minimaliseren securityrisico's
 - Volledige controle over gebruikersdata (on-premise, geen vendor lock-in)
 - Audit logging van alle inlogpogingen en rechtenwijzigingen ingebakken
 
 ### Negatieve gevolgen
 
-- Extra operationele last: de Keycloak-container moet beheerd en gemonitord worden
+- Extra operationele last: de Keycloak container moet beheerd en gemonitord worden
 - In productie vereist high availability (redundante instanties nodig)
 - Initiële configuratie (realm, clients, rollen) is tijdsintensief
 
@@ -304,15 +304,15 @@ Keycloak biedt de beste balans tussen security, controle over gevoelige data en 
 
 | | |
 |---|---|
-| **Voordeel** | Volledige controle over database-schema's en flows |
-| **Nadeel** | Extreem risicovol: wachtwoord-hashing, MFA, "Forgot Password"-flows en sessiebeheer moeten veilig van nul worden opgebouwd. Vereist gespecialiseerde security-expertise en past niet binnen de projecttijdlijn. |
+| **Voordeel** | Volledige controle over databaseschema's en flows |
+| **Nadeel** | Extreem risicovol: wachtwoordhashing, MFA, "Forgot Password"-flows en sessiebeheer moeten veilig van nul worden opgebouwd. Vereist gespecialiseerde securityexpertise en past niet binnen de projecttijdlijn. |
 
 ### Optie 2: Keycloak ✓
 
 | | |
 |---|---|
 | **Voordeel** | Out-of-the-box RBAC, SSO en LDAP/AD-integratie. On-premise, dus volledige controle over gevoelige gebruikersdata. Grote community en bewezen track record. |
-| **Nadeel** | Extra operationele last voor beheer en monitoring van de Keycloak-container. |
+| **Nadeel** | Extra operationele last voor beheer en monitoring van de Keycloak container. |
 
 ### Optie 3: Auth0 / Okta
 

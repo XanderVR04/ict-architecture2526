@@ -31,7 +31,7 @@ This repository contains the group project for the ICT Architecture course. The 
 |---|---|
 | **Security** | Niet alles is publiek toegankelijk. Authenticatie (onderzoekers vs. publiek) en autorisatie (rollen) zijn nodig, maar sturen de core architectuur minder sterk dan schaalbaarheid. |
 | **Usability** | Historici zijn vaak geen technische gebruikers. Een intuïtieve zoekinterface en goede UX voor annotaties zijn vereist. Dit zit meer in frontend en design dan in infrastructuur. |
-| **Deployability** | Docker-gebaseerde deployments moeten reproduceerbaar en eenvoudig rollback-baar zijn, met de mogelijkheid tot continuous deployment. Docker Swarm komt hier concreet in beeld. |
+| **Deployability** | Docker-gebaseerde deployments moeten reproduceerbaar en eenvoudig rollbackbaar zijn, met de mogelijkheid tot continuous deployment. Docker Swarm komt hier concreet in beeld. |
 
 ---
 
@@ -88,7 +88,7 @@ De volgende architectuurbeslissingen bouwen voort op de keuze voor microservices
 | [ADR-001](sub-ADR-001/README.md) | Gebruik van een message queue voor asynchrone ontkoppeling van document upload en OCR-verwerking (RabbitMQ) | Accepted |
 | [ADR-002](sub-ADR-002/README.md) | Gescheiden opslagstrategie voor metadata en documenten (PostgreSQL + MinIO) | In progress |
 | [ADR-003](sub-ADR-003/README.md) | Zoektechnologie voor de Search Component (Elasticsearch) | Accepted |
-| [ADR-004](sub-ADR-004/README.md) | Data-integriteit en versioning via Event Sourcing met PostgreSQL | Accepted |
+| [ADR-004](sub-ADR-004/README.md) | Dataintegriteit en versioning via Event Sourcing met PostgreSQL | Accepted |
 | [ADR-005](sub-ADR-005/README.md) | Centraal beheer van authenticatie en autorisatie (Keycloak) | Accepted |
 
 ---
@@ -133,6 +133,8 @@ Minder dominante maar relevante eisen zijn Security, Usability en Deployability.
 **Gekozen optie: Microservices architectuur**
 
 Microservices bieden de beste balans tussen schaalbaarheid, uitbreidbaarheid en separation of concerns voor een systeem dat rekenintensieve, heterogene verwerkingsstappen combineert met hoge zoekvereisten.
+
+**Tweede keuze: Layered architecture.** Indien de operationele complexiteit van microservices niet haalbaar zou zijn (bijv. bij een kleiner team of beperkt budget), zou een layered architecture de voorkeur hebben boven een monoliet. Het biedt een duidelijke structuur met scheiding van verantwoordelijkheden, al blijft de schaalbaarheid per component beperkt en is het minder geschikt voor de rekenintensieve OCR-pipeline.
 
 ### Positieve gevolgen
 
