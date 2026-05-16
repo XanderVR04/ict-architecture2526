@@ -198,7 +198,7 @@ De volgende uitdagingen zijn geïdentificeerd:
 
 ## Besluit
 
-We hebben besloten om de volgende architectuur te hanteren:
+We hebben besloten om de volgende architecturale beslissingen te hanteren:
 
 1.  **Separation of Concerns (Opslag)**: Metadata wordt opgeslagen in een relationele database (**PostgreSQL**), terwijl de fysieke bestanden worden opgeslagen in een S3-compatibele Object Store (**MinIO**).
 2.  **Bit-level Integrity**: Elke documentversie krijgt een verplichte **SHA-256 checksum** in de database.
@@ -211,7 +211,7 @@ We hebben besloten om de volgende architectuur te hanteren:
 
 - **Schaalbaarheid**: MinIO kan eenvoudiger horizontaal schalen dan een SQL-database.
 - **Performance**: De database blijft "lean". Queries op metadata zijn razendsnel omdat ze niet gehinderd worden door zware binaire data.
-- **S3-compatibiliteit**: Standardoiseert de API voor toekomstige integraties.
+- **S3-compatibiliteit**: Standardiseert de API voor toekomstige integraties.
 
 ### Waarom SHA-256 Checksums?
 
