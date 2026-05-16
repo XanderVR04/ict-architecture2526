@@ -49,7 +49,7 @@ docker swarm init
 Navigeer naar de `poc/`-directory en deploy de stack:
 
 ```
-docker stack deploy --compose-file poc.yaml poc
+docker stack deploy --compose-file poc.yaml poc-5
 ```
 
 Dit start twee services:

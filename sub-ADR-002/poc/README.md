@@ -15,7 +15,7 @@ De gehele stack (PostgreSQL, MinIO en pgAdmin) wordt uitgerold als een Docker St
 cd ~/jouw-project-map
 
 # Start de stack op het cluster
-docker stack deploy -c stack.yml adr2
+docker stack deploy -c poc.yml poc-2
 ```
 
 ---
