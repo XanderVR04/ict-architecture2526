@@ -2,7 +2,7 @@
 
 ## Wat demonstreert deze POC?
 
-Deze POC toont het architectuurpatroon uit [ADR-005](../docs/adr/ADR-005-central-auth.md): een centrale Identity Provider (**Keycloak**) die via OAuth2/OIDC communiceert met een Python/Flask REST API, waarbij Role-Based Access Control (RBAC) wordt afgedwongen.
+Deze POC toont het architectuurpatroon uit [ADR-005](../README.md): een centrale Identity Provider (**Keycloak**) die via OAuth2/OIDC communiceert met een Python/Flask REST API, waarbij Role-Based Access Control (RBAC) wordt afgedwongen.
 
 De auth-flow bestaat uit drie stappen:
 
@@ -24,7 +24,6 @@ poc/
 ├── requirements.txt             # Python dependencies (flask, PyJWT[crypto], requests)
 ├── Dockerfile                   # Alternatief voor lokale builds buiten Swarm
 ├── poc.yaml                     # Docker Swarm stack definitie
-├── start.bat                    # Hulpscript: laadt .env-variabelen en deployt de stack
 ├── keycloak/
 │   └── realm-export.json        # Automatisch geconfigureerde Keycloak-realm
 └── README.md                    # Deze file
@@ -89,7 +88,7 @@ De interface toont drie knoppen, één per scenario. Klik op een knop om de voll
 ## Stoppen
 
 ```
-docker stack rm poc
+docker stack rm poc-5
 ```
 
-> **Let op bij herdeployen:** Docker Swarm configs zijn onveranderlijk. Als je [app.py](app.py) of [keycloak/realm-export.json](keycloak/realm-export.json) aanpast, verwijder dan eerst de oude stack (`docker stack rm poc`) en herstart daarna pas.
+> **Let op bij herdeployen:** Docker Swarm configs zijn onveranderlijk. Als je [app.py](app.py) of [keycloak/realm-export.json](keycloak/realm-export.json) aanpast, verwijder dan eerst de oude stack (`docker stack rm poc-5`) en herstart daarna pas.

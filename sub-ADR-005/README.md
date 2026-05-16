@@ -27,11 +27,11 @@ Python API                         valideert JWT lokaal via gecachte JWKS-publie
 
 ## C4 Diagrammen
 
-De onderstaande diagrammen zijn opgesteld volgens het **C4-model** en opgebouwd met **Structurizr DSL**. De afzonderlijke bronbestanden staan in [docs/c4-model/](docs/c4-model/).
+De onderstaande diagrammen zijn opgesteld volgens het **C4-model** en opgebouwd met **Structurizr DSL**. De afzonderlijke bronbestanden staan in [c4-model/](c4-model/).
 
 ### Systeemcontextdiagram
 
-![Systeemcontextdiagram](c4-model/systemcontextdiagram.png)
+![Systeemcontextdiagram](c4-model/system-context.png)
 
 ```dsl
 workspace {
@@ -79,7 +79,7 @@ workspace {
 
 ### Containerdiagram
 
-![Containerdiagram](c4-model/containerdiagram.png)
+![Containerdiagram](c4-model/container.png)
 
 ```dsl
 workspace {
@@ -130,7 +130,7 @@ workspace {
 
 ### Deployment diagram
 
-![Deployment diagram](c4-model/deploymentdiagram.png)
+![Deployment diagram](c4-model/deployment.png)
 
 ```dsl
 workspace {
@@ -192,28 +192,28 @@ workspace {
 ## Mappenstructuur
 
 ```
-projectodracht-ict-architecture/
-├── docs/
-│   ├── adr/
-│   │   └── ADR-005-central-auth.md        # Architectuurbeslissing: centrale IdP (MADR)
-│   └── c4-model/
-│       ├── system-context.dsl             # C4 systeemcontextdiagram (Structurizr DSL)
-│       ├── systemcontextdiagram.png       # Visueel systeemcontextdiagram
-│       ├── container.dsl                  # C4 containerdiagram (Structurizr DSL)
-│       ├── containerdiagram.png           # Visueel containerdiagram
-│       ├── deployment.dsl                 # C4 deployment diagram (Structurizr DSL)
-│       └── deploymentdiagram.png          # Visueel deployment diagram
-├── poc/
-│   ├── app.py                             # Flask API met echte JWT-validatie via Keycloak JWKS
-│   ├── requirements.txt                   # Python dependencies (flask, PyJWT[crypto], requests)
-│   ├── Dockerfile                         # Alternatief voor lokale builds buiten Swarm
-│   ├── poc.yaml                           # Docker Swarm stack definitie
-│   ├── start.bat                          # Hulpscript: laadt .env-variabelen en deployt de stack
-│   ├── keycloak/
-│   │   └── realm-export.json              # Automatisch geconfigureerde Keycloak-realm
-│   └── README.md                          # Opstartinstructies voor de POC
+sub-ADR-005/
+├── README.md                              # Dit bestand (overzicht en ADR documentatie)
 ├── .env.example                           # Voorbeeld omgevingsvariabelen
-└── README.md
+├── c4-model/
+│   ├── system-context.dsl                 # C4 systeemcontextdiagram (Structurizr DSL)
+│   ├── system-context.png                 # Visueel systeemcontextdiagram
+│   ├── container.dsl                      # C4 containerdiagram (Structurizr DSL)
+│   ├── container.png                      # Visueel containerdiagram
+│   ├── deployment.dsl                     # C4 deployment diagram (Structurizr DSL)
+│   └── deployment.png                     # Visueel deployment diagram
+└── poc/
+    ├── app.py                             # Flask API met echte JWT-validatie via Keycloak JWKS
+    ├── requirements.txt                   # Python dependencies (flask, PyJWT[crypto], requests)
+    ├── Dockerfile                         # Alternatief voor lokale builds buiten Swarm
+    ├── poc.yaml                           # Docker Swarm stack definitie
+    ├── .env                               # Omgevingsvariabelen (niet in versiecontrole)
+    ├── .env.example                       # Voorbeeld omgevingsvariabelen
+    ├── keycloak/
+    │   └── realm-export.json              # Automatisch geconfigureerde Keycloak-realm
+    ├── public/
+    │   └── index.html                     # Web interface voor de POC
+    └── README.md                          # Opstartinstructies voor de POC
 ```
 
 ---
@@ -230,11 +230,11 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 |---|---|
 | [ADR-005](README.md) | Architectuurbeslissing: Keycloak als centrale IdP (MADR-formaat) |
 | [Systeemcontextdiagram (DSL)](c4-model/system-context.dsl) | C4 systeemcontextdiagram in Structurizr DSL |
-| [Systeemcontextdiagram (PNG)](c4-model/systemcontextdiagram.png) | Visuele weergave van de systeemcontext |
+| [Systeemcontextdiagram (PNG)](c4-model/system-context.png) | Visuele weergave van de systeemcontext |
 | [Containerdiagram (DSL)](c4-model/container.dsl) | C4 containerdiagram in Structurizr DSL |
-| [Containerdiagram (PNG)](c4-model/containerdiagram.png) | Visuele weergave van de containerarchitectuur |
+| [Containerdiagram (PNG)](c4-model/container.png) | Visuele weergave van de containerarchitectuur |
 | [Deploymentdiagram (DSL)](c4-model/deployment.dsl) | C4 deployment diagram in Structurizr DSL |
-| [Deploymentdiagram (PNG)](c4-model/deploymentdiagram.png) | Visuele weergave van de deploymentarchitectuur |
+| [Deploymentdiagram (PNG)](c4-model/deployment.png) | Visuele weergave van de deploymentarchitectuur |
 
 ### Kernbeslissing
 
@@ -253,8 +253,6 @@ Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/
 
 **Status:** Accepted  
 **Datum:** 2026-05-05  
-**Eigenaar:** Xander Van Raemdonck
-
 ---
 
 ## Context en Probleemstelling

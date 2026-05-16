@@ -112,3 +112,174 @@ Daarnaast draagt deze aanpak bij aan:
 
 De keuze voor RabbitMQ is een implementatiedetail dat deze architecturale beslissing ondersteunt.  
 De kern van de beslissing is het gebruik van een message queue als patroon, onafhankelijk van de specifieke technologie.
+
+---
+
+## C4-Model
+
+De architectuur is vastgelegd in Structurizr DSL. De bronbestanden staan in [c4-model/](c4-model/).
+
+### Systeemcontextdiagram
+
+![Systeemcontextdiagram](c4-model/systemcontext.png)
+
+```structurizr
+workspace {
+
+    model {
+        researcher = person "Researcher"
+        archivist = person "Archivist"
+
+
+        system = softwareSystem "Document Digitalization System" {
+            description "Systeem voor het digitaliseren en verwerken van documenten met OCR"
+        }
+
+        archivist -> system "Uploadt en beheert documenten, metadata toevoegen en beheren"
+        researcher -> system "Vraagt documenten, bekijkt resultaten en maakt annotaties"
+    }
+
+    views {
+        systemContext system {
+            include *
+            autolayout lr
+        }
+
+        theme default
+    }
+}
+```
+
+### Containerdiagram
+
+![Containerdiagram](c4-model/container.png)
+
+```structurizr
+workspace {
+
+    model {
+        user = person "Researcher / Archivist"
+
+        system = softwareSystem "Document Digitalization System" {
+
+            webapp = container "Web Application" {
+                description "Frontend voor gebruikers"
+                technology "Web App"
+            }
+
+            api = container "Backend API" {
+                description "Verwerkt requests, beheert jobs en communiceert met queue"
+                technology "REST API"
+            }
+
+            queue = container "Message Queue" {
+                description "Queue voor asynchrone verwerking"
+                technology "RabbitMQ"
+            }
+
+            processing = container "Processing Service" {
+                description "Voert OCR en document verwerking uit"
+                technology "Worker service"
+            }
+
+            db = container "Database" {
+                description "Opslag van documenten, metadata en job status"
+                technology "PostgreSQL / MongoDB"
+            }
+        }
+
+        user -> webapp "Gebruikt"
+
+        webapp -> api "Uploadt documenten / vraagt status"
+
+        api -> db "Slaat metadata en job status op"
+        api -> queue "Plaats verwerkingstaak"
+
+        queue -> processing "Levert taken"
+        processing -> queue "Ack / status (optioneel)"
+
+        processing -> db "Slaat resultaten en updates status"
+
+        webapp -> api "Pollt voor status/resultaat"
+        api -> db "Leest resultaten"
+    }
+
+    views {
+        container system {
+            include *
+            autolayout lr
+        }
+
+        theme default
+    }
+}
+```
+
+### Deploymentdiagram
+
+![Deploymentdiagram](c4-model/deployment.png)
+
+```structurizr
+workspace {
+
+    model {
+        system = softwareSystem "Document Digitalization System" {
+
+            webapp = container "Web Application"
+            api = container "Backend API"
+            queue = container "Message Queue"
+            processing = container "Processing Service"
+            db = container "Database"
+
+            // Relaties (essentieel voor layout)
+            webapp -> api "HTTP requests"
+            api -> queue "Sends processing tasks"
+            processing -> queue "Consumes tasks"
+            processing -> db "Stores results"
+            api -> db "Reads/Writes metadata"
+        }
+
+        deploymentEnvironment "Production" {
+
+            deploymentNode "Docker Swarm Cluster" {
+
+                deploymentNode "Manager Node" {
+                    containerInstance webapp
+                    containerInstance api
+                }
+
+                deploymentNode "Worker Node 1" {
+                    containerInstance processing
+                }
+
+                deploymentNode "Worker Node 2" {
+                    containerInstance processing
+                }
+
+                deploymentNode "Queue Node" {
+                    containerInstance queue
+                }
+
+                deploymentNode "Database Node" {
+                    containerInstance db
+                }
+            }
+        }
+    }
+
+    views {
+        deployment system "Production" {
+            include *
+            autolayout lr 300 200
+        }
+
+        theme default
+    }
+}
+```
+
+---
+
+## POC
+
+Alle instructies voor opstarten, testen en stoppen staan in [poc/README.md](poc/README.md).

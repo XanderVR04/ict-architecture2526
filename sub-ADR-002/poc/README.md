@@ -11,9 +11,7 @@ De gehele stack (PostgreSQL, MinIO en pgAdmin) wordt uitgerold als een Docker St
 **Commando's:**
 
 ```bash
-# Ga naar de map met je stack.yml
-cd ~/jouw-project-map
-
+# Zorg dat je in de poc/-map van sub-ADR-002 staat
 # Start de stack op het cluster
 docker stack deploy -c poc.yml poc-2
 ```
@@ -106,3 +104,11 @@ ORDER BY timestamp DESC;
 - **Data Integriteit**: Gebruik van SHA-256 hashes om aan te tonen dat de bestanden in de Object Store niet ongemerkt gewijzigd kunnen worden.
 - **Security**: Implementatie van een `role_id` op documentniveau als basis voor Role-Based Access Control.
 - **Orchestratie**: Gebruik van Docker Swarm voor container management, wat de overstap naar een productie-omgeving vereenvoudigt.
+
+---
+
+## 6. Opruimen
+
+```bash
+docker stack rm poc-2
+```

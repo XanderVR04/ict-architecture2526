@@ -2,19 +2,19 @@
 
 Deze POC toont asynchrone verwerking via een message queue.
 De uploader plaatst jobs in RabbitMQ, de processor verwerkt die met vertraging.
-De OCR wordt gesimuleerd door `time.sleep(5)` in [sub-ADR-001/poc/processor/processor.py](sub-ADR-001/poc/processor/processor.py).
+De OCR wordt gesimuleerd door `time.sleep(5)` in [processor/processor.py](processor/processor.py).
 
 ## Run (externe swarm)
 
-Voer dit uit op een swarm **manager**. Zorg dat je in [sub-ADR-001/poc](sub-ADR-001/poc) staat.
+Voer dit uit op een swarm **manager**. Zorg dat je in de `poc/`-map van sub-ADR-001 staat.
 
 1) echo "user" > ./secrets/rabbitmq_user.txt
 2) echo "pass" > ./secrets/rabbitmq_pass.txt
 3) echo "poc_rabbitmq." > ./configs/rabbitmq_host.txt
 4) printf "default_user = user\ndefault_pass = pass\n" > ./configs/rabbitmq.conf
 
-Let op: de waarden in [sub-ADR-001/poc/configs/rabbitmq.conf](sub-ADR-001/poc/configs/rabbitmq.conf) moeten overeenkomen met de secrets.
-Tip: zet in [sub-ADR-001/poc/configs/rabbitmq_host.txt](sub-ADR-001/poc/configs/rabbitmq_host.txt) `poc_rabbitmq.` (met punt) om het zoekdomein te omzeilen.
+Let op: de waarden in [configs/rabbitmq.conf](configs/rabbitmq.conf) moeten overeenkomen met de secrets.
+Tip: zet in [configs/rabbitmq_host.txt](configs/rabbitmq_host.txt) `poc_rabbitmq.` (met punt) om het zoekdomein te omzeilen.
 
 Voer dan deze uit (telkens opnieuw wanneer je de POC start):
 
@@ -38,4 +38,4 @@ Logs bekijk je op de node waar de service draait:
 - docker service scale poc_processor=2
 
 ## Opruimen
-- docker stack rm poc
+- docker stack rm poc-1

@@ -116,8 +116,8 @@ De volgende architectuurbeslissingen bouwen voort op de keuze voor microservices
 
 | ADR | Onderwerp | Status |
 |-----|-----------|--------|
-| [ADR-001](ADR-001/README.md) | Gebruik van een message queue voor asynchrone ontkoppeling van document upload en OCR-verwerking (RabbitMQ) | Accepted |
-| [ADR-002](ADR-002/README.md) | Gescheiden opslagstrategie voor metadata en documenten (PostgreSQL) | In progress |
-| [ADR-003](ADR-003/README.md) | Zoektechnologie voor de Search Component (Elasticsearch) | Accepted |
-| [ADR-004](ADR-004/README.md) | Data-integriteit en versioning via Event Sourcing met PostgreSQL | Accepted |
-| [ADR-005](ADR-005/README.md) | Centraal beheer van authenticatie en autorisatie (Keycloak) | Accepted |
+| [ADR-001](sub-ADR-001/README.md) | Gebruik van een message queue voor asynchrone ontkoppeling van document upload en OCR-verwerking (RabbitMQ) | Accepted |
+| [ADR-002](sub-ADR-002/README.md) | Gescheiden opslagstrategie voor metadata en documenten (PostgreSQL) | In progress |
+| [ADR-003](sub-ADR-003/README.md) | Zoektechnologie voor de Search Component (Elasticsearch) | Accepted |
+| [ADR-004](sub-ADR-004/README.md) | Data-integriteit en versioning via Event Sourcing met PostgreSQL | Accepted |
+| [ADR-005](sub-ADR-005/README.md) | Centraal beheer van authenticatie en autorisatie (Keycloak) | Accepted |

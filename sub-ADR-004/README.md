@@ -26,7 +26,7 @@ De onderstaande diagrammen zijn opgesteld volgens het **C4-model** en opgebouwd 
 
 ### Systeemcontextdiagram
 
-![Systeemcontextdiagram](C4-Systeemcontect.png)
+![Systeemcontextdiagram](c4-model/system-context.png)
 
 ```structurizr
 workspace "Document Archief" "Systeemcontext" {
@@ -48,7 +48,7 @@ workspace "Document Archief" "Systeemcontext" {
 
 ### Containerdiagram
 
-![Containerdiagram](C4-Container_Diagram.png)
+![Containerdiagram](c4-model/container.png)
 
 ```structurizr
 workspace "Document Archief" "Container Diagram" {
@@ -85,7 +85,7 @@ workspace "Document Archief" "Container Diagram" {
 
 ### Deployment diagram
 
-![Deployment diagram](C4-Deployment_Diagram.png)
+![Deployment diagram](c4-model/deployment.png)
 
 ```structurizr
 workspace "Document Archief" "Deployment Diagram" {
@@ -146,15 +146,21 @@ workspace "Document Archief" "Deployment Diagram" {
 ## Mappenstructuur
 
 ```
-ADR-004-Data-Integriteit-en-Versioning/
+sub-ADR-004/
 ├── README.md                                 # Dit bestand (overzicht en documentatie)
-├── C4-Systeemcontect.png                    # Visueel systeemcontextdiagram
-├── C4-Container_Diagram.png                 # Visueel containerdiagram
-├── C4-Deployment_Diagram.png                # Visueel deploymentdiagram
+├── c4-model/                                 # C4-diagrammen (Structurizr DSL + afbeeldingen)
+│   ├── system-context.dsl                    # Structurizr DSL - systeemcontextdiagram
+│   ├── system-context.png                    # Visueel systeemcontextdiagram
+│   ├── container.dsl                         # Structurizr DSL - containerdiagram
+│   ├── container.png                         # Visueel containerdiagram
+│   ├── deployment.dsl                        # Structurizr DSL - deploymentdiagram
+│   └── deployment.png                        # Visueel deploymentdiagram
 └── poc/                                      # Proof of Concept implementatie
     ├── server.js                             # Node.js backend met Event Sourcing logica
     ├── init.sql                              # Database schema voor de Event Store
     ├── poc.yaml                              # Docker Swarm stack definitie
+    ├── package.json                          # Node.js dependencies
+    ├── .env.example                          # Voorbeeld omgevingsvariabelen
     ├── public/
     │   └── index.html                        # Frontend interface voor de POC
     └── README.md                             # Opstartinstructies voor de POC

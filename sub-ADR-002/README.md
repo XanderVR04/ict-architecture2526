@@ -19,7 +19,7 @@ Tijdens de ontwikkeling zijn de volgende keuzes gemaakt om de stabiliteit binnen
 1. **Named Volumes**: In plaats van bind mounts gebruiken we Docker-managed volumes (`minio_volume`, `postgres_volume`). Dit voorkomt permissie-fouten en "Rejected" states bij het deployen op verschillende cluster-nodes.
 2. **Hardcoded Environment Variables**: Om initialisatie-fouten (zoals lege admin-credentials) te voorkomen, zijn de omgevingsvariabelen direct in de `stack.yml` gedefinieerd voor deze PoC.
 
-Voor een gedetailleerde onderbouwing, zie de **[ADR.md](./ADR.md)**.
+Voor een gedetailleerde onderbouwing, zie de ADR-sectie onderaan dit document.
 
 ---
 
@@ -43,10 +43,10 @@ Gebruik de volgende commando's in de terminal:
 
 ```bash
 # Eventuele oude stack verwijderen
-docker stack rm adr2
+docker stack rm poc-2
 
-# De stack deployen met de geoptimaliseerde configuratie
-docker stack deploy -c stack.yml adr2
+# Navigeer naar de poc/-map en start de stack
+docker stack deploy -c poc.yml poc-2
 ```
 
 ### Toegang tot de Services (Node: 10.164.10.29)
@@ -61,12 +61,114 @@ docker stack deploy -c stack.yml adr2
 
 ---
 
-## 4. Visualisatie (C4-Model)
+## 4. C4-Model
 
-De structuur van dit project is inzichtelijk gemaakt via C4-diagrammen in Structurizr DSL:
+De architectuur is vastgelegd in Structurizr DSL. De bronbestanden staan in [c4-model/](c4-model/).
 
-- **[C4-POC/](./C4-POC/)**: Diagrammen van de huidige Docker Swarm-opzet.
-- **[C4-POC-toekomstig/](./C4-POC-toekomstig/)**: Blauwdruk voor de volledige applicatie inclusief Frontend SPA en Backend API.
+### DSL broncode
+
+Zie [c4-model/c4.dsl](c4-model/c4.dsl).
+
+```structurizr
+workspace "Digitaal Archief PoC" "Architectuur voor documentopslag en integriteit" {
+
+    model {
+        user = person "Archivaris" "Beheert en raadpleegt historische documenten."
+
+        group "Onderzoeksafdeling Geschiedenis" {
+            archiveSystem = softwareSystem "Digitaal Archief Systeem" "Systeem voor veilige opslag en metadata beheer van scans." {
+                webInterface = container "pgAdmin / Admin Interface" "Beheerinterface voor database-operaties." "Browser-gebaseerd" "Web Browser"
+                db = container "Metadata Store (PostgreSQL)" "Slaat metadata, rollen en checksums op." "PostgreSQL 15" "Database"
+                objectStore = container "Object Store (MinIO)" "Slaat fysieke binaire bestanden (PDF/Images) op." "MinIO / S3" "Storage"
+                apiServer = container "Backend API" "Verwerkt uploads, berekent SHA-256 hashes en beheert RBAC." "Python/Node.js" "Logic" {
+                    integrityComponent = component "Integrity Checker" "Berekent en verifieert SHA-256 checksums." "Logic"
+                    accessComponent = component "RBAC Manager" "Controleert role_id permissies." "Logic"
+                    storageComponent = component "Storage Orchestrator" "Coördineert transacties tussen DB en MinIO." "Logic"
+                }
+            }
+        }
+
+        # Relaties
+        user -> webInterface "Beheert metadata via"
+        user -> apiServer "Uploadt documenten naar"
+        webInterface -> db "Directe database queries"
+        user -> storageComponent "Stuurt bestanden naar"
+        storageComponent -> integrityComponent "Vraagt hash berekening aan"
+        storageComponent -> objectStore "Streamt data naar" "S3 API"
+        storageComponent -> db "Registreert metadata via" "SQL"
+        storageComponent -> accessComponent "Valideert rechten via"
+
+        # C4 Deployment: Fysieke weergave van je Swarm Cluster
+        production = deploymentEnvironment "Production" {
+            deploymentNode "Docker Swarm Cluster" "Manager & Worker Nodes" "Ubuntu Server" {
+                deploymentNode "Manager Node (nick-reul)" "Primary node" "Docker Engine" {
+                    containerInstance db
+                    containerInstance webInterface
+                }
+                deploymentNode "Worker Node (aron-bauwens)" "Secondary node" "Docker Engine" {
+                    containerInstance apiServer
+                }
+                deploymentNode "Worker Node (xander-vanraemdonck)" "Storage node" "Docker Engine" {
+                    containerInstance objectStore
+                }
+            }
+        }
+    }
+
+    views {
+        systemContext archiveSystem "SystemContext" {
+            include *
+            autoLayout lr
+        }
+
+        container archiveSystem "Containers" {
+            include *
+            autoLayout lr
+        }
+
+        component apiServer "Components" {
+            include *
+            autoLayout lr
+        }
+
+        deployment archiveSystem "Production" "Deployment" {
+            include *
+            autoLayout lr
+        }
+
+        styles {
+            element "Person" {
+                shape Person
+                background #08427b
+                color #ffffff
+            }
+            element "Software System" {
+                background #1168bd
+                color #ffffff
+            }
+            element "Container" {
+                background #438dd5
+                color #ffffff
+            }
+            element "Database" {
+                shape Cylinder
+            }
+            element "Component" {
+                background #85bbf0
+                color #000000
+            }
+            element "Deployment Node" {
+                background #ffffff
+                color #000000
+            }
+        }
+    }
+}
+```
+
+### Diagram
+
+![C4 diagram](c4-model/c4.png)
 
 ---
 

@@ -34,5 +34,5 @@ Hierdoor is het onmogelijk om per ongeluk data te verliezen of te overschrijven:
 ## Opruimen
 Om de POC af te sluiten en te verwijderen uit je swarm:
 ```bash
-docker stack rm poc_data
+docker stack rm poc-4
 ```
