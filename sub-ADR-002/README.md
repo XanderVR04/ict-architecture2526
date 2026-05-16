@@ -96,7 +96,7 @@ De volgende uitdagingen zijn geïdentificeerd:
 
 ## Besluit
 
-We hebben besloten om de volgende architectuur te hanteren:
+We hebben besloten om de volgende architecturale beslissingen te hanteren:
 
 1.  **Separation of Concerns (Opslag)**: Metadata wordt opgeslagen in een relationele database (**PostgreSQL**), terwijl de fysieke bestanden worden opgeslagen in een S3-compatibele Object Store (**MinIO**).
 2.  **Bit-level Integrity**: Elke documentversie krijgt een verplichte **SHA-256 checksum** in de database.
