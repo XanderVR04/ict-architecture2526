@@ -109,7 +109,7 @@ We hebben besloten om de volgende architecturale beslissingen te hanteren:
 
 - **Schaalbaarheid**: MinIO kan eenvoudiger horizontaal schalen dan een SQL-database.
 - **Performance**: De database blijft "lean". Queries op metadata zijn razendsnel omdat ze niet gehinderd worden door zware binaire data.
-- **S3-compatibiliteit**: Standardoiseert de API voor toekomstige integraties.
+- **S3-compatibiliteit**: Standardiseert de API voor toekomstige integraties.
 
 ### Waarom SHA-256 Checksums?
 
