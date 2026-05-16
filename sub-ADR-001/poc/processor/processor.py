@@ -38,9 +38,12 @@ def handle(ch, method, properties, body):
     time.sleep(5)
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
+# qos = quality of service, hiermee kan worden ingesteld hoeveel berichten een consument tegelijk mag verwerken.
 # prefetch_count=1 zorgt ervoor dat de processor slechts één bericht tegelijk verwerkt,
 # wat helpt bij het eerlijk verdelen van werk als er meerdere processors zijn.
 ch.basic_qos(prefetch_count=1)
 ch.basic_consume(queue="ocr_jobs", on_message_callback=handle)
 print("processor ready", flush=True)
+# start_consuming() zorgt ervoor dat de processor blijft luisteren naar nieuwe berichten op de "ocr_jobs" queue 
+# en de handle functie aanroept wanneer er een nieuw bericht binnenkomt.
 ch.start_consuming()
