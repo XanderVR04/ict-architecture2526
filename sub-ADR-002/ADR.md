@@ -8,8 +8,7 @@ De volgende uitdagingen zijn geïdentificeerd:
 
 1. Database-bloat: Het opslaan van grote PDF's in PostgreSQL maakt back-ups en queries traag.
 2. Integriteit: Hoe garanderen we dat een bestand na 10 jaar nog exact hetzelfde is?
-3. Security: Hoe beperken we toegang tot specifieke documenten?
-4. Container Orchestration: Hoe zorgen we voor hoge beschikbaarheid en schaalbaarheid?
+3. Container Orchestration: Hoe zorgen we voor hoge beschikbaarheid en schaalbaarheid?
 
 ## Besluit
 
